@@ -1,0 +1,8 @@
+[package]
+name = "hex2d"
+version = "0.0.2"
+authors = [ "dpc@ucore.info" ]
+
+[lib]
+name = "hex2d"
+path = "src/lib.rs"
