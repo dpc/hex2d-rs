@@ -6,6 +6,8 @@
 #![license = "MIT"]
 #![crate_type = "lib"]
 
+#![warn(missing_doc)]
+
 //! Hexagonal map operations
 //!
 //! The coordinate system is supposed to be similar to the one used usually on screens,
@@ -38,9 +40,13 @@ mod test;
 #[deriving(Eq)]
 #[deriving(PartialEq)]
 pub enum Direction {
+    /// Forward
     Forward,
+    /// Backward
     Backward,
+    /// Right-Forward
     Right,
+    /// Left-Forward
     Left
 }
 
@@ -51,23 +57,31 @@ pub enum Direction {
 #[deriving(PartialEq)]
 #[deriving(FromPrimitive)]
 pub enum AbsoluteDirection {
+    /// Up
     North = 0,
+    /// Up-Right
     NorthEast,
+    /// Down-Right
     SouthEast,
+    /// Down
     South,
+    /// Down-Left
     SouthWest,
+    /// Up -Left
     NorthWest
 }
 
 pub static all_directions: [AbsoluteDirection, .. 6] = [North, NorthEast, SouthEast, South, SouthWest, NorthWest];
 
 
-/// 2d point on hexagonal grid
+/// Point on 2d hexagonal grid
 #[deriving(Clone)]
 #[deriving(Eq)]
 #[deriving(PartialEq)]
 pub struct Point {
+    /// `x` coordinate
     pub x : int,
+    /// `y` coordingate
     pub y : int
 }
 
@@ -78,7 +92,9 @@ pub struct Point {
 #[deriving(Eq)]
 #[deriving(PartialEq)]
 pub struct Position {
+    /// Point on the grid
     pub p : Point,
+    /// Absolute direction
     pub dir : AbsoluteDirection
 }
 
@@ -91,53 +107,64 @@ pub struct Map<T> {
 
 /// Can be treated as a `Point`
 pub trait AsPoint {
+    /// Get the `Point` part of this data
     fn as_point<'a>(&'a self) -> &'a Point;
 }
 
 /// Can be treated a `mut Point`
 pub trait AsMutPoint {
+    /// Get the `mut Point` part of this data
     fn as_mut_point<'a>(&'a mut self) -> &'a mut Point;
 }
 
 /// Can be treated a `AbsoluteDirection`
 trait AsAbsoluteDirection {
+    /// Get the `AbsoluteDirection` part of this data
     fn as_direction<'a>(&'a self) -> &'a AbsoluteDirection;
 }
 
 /// Can be treated a `mut AbsoluteDirection`
 trait AsMutAbsoluteDirection {
+    /// Get the `mut AbsoluteDirection` part of this data
     fn as_mut_direction<'a>(&'a mut self) -> &'a mut AbsoluteDirection;
 }
 
 /// Can be wrapped over `Map`
 trait MapWrappable<T> {
-    fn wrap(&self, w: uint, h: uint) -> T;
+    /// Wrap around the map of a given `width` and `height`.
+    fn wrap(&self, width: uint, height: uint) -> T;
 }
 
 /// Can be added to a `Point`
 trait PointAddable {
+    /// Add to `p`
     fn add_to_point(&self, p : &Point) -> Point;
+    /// Substrat from `p`
     fn sub_from_point(&self, p : &Point) -> Point;
 }
 
 /// Can be added to a `Position`
 trait PositionAddable {
-    fn add_to_position(&self, p : &Position) -> Position;
+    /// Add to `pos`
+    fn add_to_position(&self, pos : &Position) -> Position;
 }
 
 /// Can be added to a `AbsoluteDirection`
 trait AbsoluteDirectionAddable {
-    fn add_to_absolutedirection(&self, p : &AbsoluteDirection) -> AbsoluteDirection;
+    /// Add to `dir`
+    fn add_to_absolutedirection(&self, dir : &AbsoluteDirection) -> AbsoluteDirection;
 }
 
 /// Can be rotated by `AbsoluteDirection`
 trait Rotatable {
-    fn rotate_by(&self, AbsoluteDirection) -> Self;
+    /// Add by `dir`, when `North` means 0 degrees
+    fn rotate_by(&self, dir : AbsoluteDirection) -> Self;
 }
 
 /// Can be translated
 trait Translatable {
-    fn translate_by(&self, Point) -> Self;
+    /// Translate by `p`
+    fn translate_by(&self, p : Point) -> Self;
 }
 
 impl PositionAddable for Direction {
@@ -164,6 +191,7 @@ impl AbsoluteDirectionAddable for Direction {
 }
 
 impl AbsoluteDirection {
+    /// Create `AbsoluteDirection` from `uint` (0 to 5 range)
     pub fn from_uint(i : uint) -> AbsoluteDirection {
         match i {
             0 => North,
@@ -176,6 +204,7 @@ impl AbsoluteDirection {
         }
     }
 
+    /// Calculate `AbsoluteDirection` after rotating by `Direction`
     pub fn turn(&self, rd : Direction) -> AbsoluteDirection {
         FromPrimitive::from_int(match rd {
             Forward => *self as int,
@@ -193,6 +222,9 @@ impl AbsoluteDirection {
         self.turn_by_int(dir as int)
     }
 
+    /// Turn `AbsoluteDirection` into a relative `Point`
+    /// (a `Point` that is result of moving in `AbsoluteDirection`
+    /// starting from `(0, 0)`.
     pub fn to_relative_point(&self) -> Point {
         match *self {
             North =>     Point { x: 0, y: -1 },
@@ -204,6 +236,9 @@ impl AbsoluteDirection {
         }
     }
 
+    /// Opposite direction
+    ///
+    /// Eg. `South` is an opposite direction to `North`
     pub fn opposite (&self) -> AbsoluteDirection {
         match *self {
             North => South,
@@ -215,6 +250,11 @@ impl AbsoluteDirection {
         }
     }
 
+    /// Negative `AbsoluteDirection` for turning operations
+    ///
+    /// For rotation operatins `AbsoluteDirection` can be used as an angle value, with `North`
+    /// considered 0 degrees. `opposite` is a direction that one would have to turn again, to get
+    /// to original orientation.
     fn negative_rot(&self) -> AbsoluteDirection {
         match *self {
             North => North,
@@ -346,10 +386,12 @@ impl Neg<AbsoluteDirection> for AbsoluteDirection {
 
 
 impl Point {
+    /// Construct `Point` from `x` and `y` coordinates
     pub fn new(x : int, y : int) -> Point {
         Point { x: x, y: y }
     }
 
+    /// Is `pt` an neighbor?
     pub fn is_neighbor(&self, pt: Point) -> bool {
         let r = self - pt;
         match (r.x, r.y) {
@@ -365,17 +407,17 @@ impl Point {
         }
     }
 
+    /// Offset between `self` and `p`
     pub fn offset(&self, p : Point) -> Point{
         p - *self
     }
 
-    /**
-     * Translate p by self.
-     */
+    /// Translate `p` by `self`.
     pub fn translate(&self, p : Point) -> Point {
         self + p
     }
 
+    /// List of neighbors
     pub fn neighbors(&self) -> [Point, ..6] {
         let p = self;
         [p + North, p + NorthEast, p + SouthEast,
@@ -438,10 +480,12 @@ impl fmt::Show for Point {
 }
 
 impl Position {
+    /// Construct `Position` from `Point` and `AbsoluteDirection`
     pub fn new(p : Point, dir : AbsoluteDirection) -> Position {
         Position { p: p, dir: dir }
     }
 
+    /// Construct `Position` from `x`, `y`, and `AbsoluteDirection`
     pub fn new2(x : int, y : int, dir : AbsoluteDirection) -> Position {
         Position { p : Point {x: x, y: y}, dir: dir }
     }
@@ -567,6 +611,7 @@ impl AsMutPoint for Position {
 
 
 impl<T : Clone> Map<T> {
+    /// Construct Map of given size, and filled with `fill`
     pub fn new(w: uint, h: uint, fill : T) -> Map<T> {
         Map {
             width: w,
@@ -575,14 +620,17 @@ impl<T : Clone> Map<T> {
         }
     }
 
+    /// Map `width`
     pub fn width(&self) -> uint {
         self.width
     }
 
+    /// Map `height`
     pub fn height(&self) -> uint {
         self.width
     }
 
+    /// Iterate over every `Point` of the `self`
     pub fn for_each_point(&self, f : |Point|) {
         for x in range(0i, self.width() as int) {
             for y in range(0i, self.height() as int) {
@@ -593,18 +641,22 @@ impl<T : Clone> Map<T> {
 }
 
 impl<T> Map<T> {
+    /// Clone map
     pub fn clone<F : Clone>(&self, fill : F) -> Map<F> {
         Map::new(self.width, self.height, fill)
     }
 
+    /// Access given map tile
     pub fn at<'a>(&'a self, p : Point) -> &'a T {
         &self.tiles[p.x as uint][p.y as uint]
     }
 
+    /// Access given map tile (mutable)
     pub fn mut_at<'a>(&'a mut self, p : Point) -> &'a mut T {
         self.tiles.get_mut(p.x as uint).get_mut(p.y as uint)
     }
 
+    /// Wrap `p` over map size
     pub fn wrap<T:MapWrappable<T>>(&self, p : T) -> T {
         p.wrap(self.width, self.height)
     }
