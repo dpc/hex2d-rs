@@ -6,3 +6,6 @@ authors = [ "dpc@ucore.info" ]
 [lib]
 name = "hex2d"
 path = "src/lib.rs"
+
+[dependencies.num]
+git = "https://github.com/rust-lang/num"
