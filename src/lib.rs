@@ -130,7 +130,7 @@ trait AsMutAbsoluteDirection {
 }
 
 /// Can be wrapped over `Map`
-trait MapWrappable<T> {
+pub trait MapWrappable<T> {
     /// Wrap around the map of a given `width` and `height`.
     fn wrap(&self, width: uint, height: uint) -> T;
 }
@@ -156,13 +156,13 @@ trait AbsoluteDirectionAddable {
 }
 
 /// Can be rotated by `AbsoluteDirection`
-trait Rotatable {
+pub trait Rotatable {
     /// Add by `dir`, when `North` means 0 degrees
     fn rotate_by(&self, dir : AbsoluteDirection) -> Self;
 }
 
 /// Can be translated
-trait Translatable {
+pub trait Translatable {
     /// Translate by `p`
     fn translate_by(&self, p : Point) -> Self;
 }
