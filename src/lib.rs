@@ -200,7 +200,7 @@ impl AbsoluteDirection {
             3 => South,
             4 => SouthWest,
             5 => NorthWest,
-            _ => fail!()
+            _ => panic!()
         }
     }
 
