@@ -204,6 +204,11 @@ impl AbsoluteDirection {
         }
     }
 
+    /// Convert to uint
+    pub fn to_uint(&self) -> uint {
+        FromPrimitive::from_int(*self as int).unwrap()
+    }
+
     /// Calculate `AbsoluteDirection` after rotating by `Direction`
     pub fn turn(&self, rd : Direction) -> AbsoluteDirection {
         FromPrimitive::from_int(match rd {
