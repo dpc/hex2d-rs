@@ -2,7 +2,7 @@
 // See LICENSE file for more information
 use super::Point;
 use super::Position;
-use super::all_directions;
+use super::ALL_DIRECTIONS;
 use super::{Forward,Backward,Left,Right};
 use super::{North,South,NorthWest,NorthEast,SouthWest,SouthEast};
 
@@ -31,7 +31,7 @@ fn point_add_and_sub() {
 fn left_and_right() {
     let dirs = [North, NorthEast, SouthEast, South, SouthWest, NorthWest];
 
-    for (i, d) in dirs.iter().enumerate() {
+    for (i, &d) in dirs.iter().enumerate() {
 
         assert_eq!(d + Left, dirs[(i + 5) % 6]);
         assert_eq!(d + Right, dirs[(i + 1) % 6]);
@@ -40,7 +40,7 @@ fn left_and_right() {
 
 #[test]
 fn direction_turn() {
-    for &dir in all_directions.iter() {
+    for &dir in ALL_DIRECTIONS.iter() {
         assert_eq!(dir.turn(Forward), dir);
         assert_eq!(dir.turn(Backward).turn(Backward), dir);
         assert_eq!(dir.turn(Left).turn(Right), dir);
@@ -52,7 +52,7 @@ fn direction_turn() {
 
 #[test]
 fn direction_turn_by_add() {
-    for &dir in all_directions.iter() {
+    for &dir in ALL_DIRECTIONS.iter() {
         assert_eq!(dir + Forward, dir);
         assert_eq!(dir + Backward + Backward, dir);
         assert_eq!(dir + Left + Right, dir);
@@ -68,7 +68,7 @@ fn move_circularly() {
         let mut start = p;
         let end = p;
 
-        for &dir in all_directions.iter() {
+        for &dir in ALL_DIRECTIONS.iter() {
             start = start + dir;
         }
 
@@ -82,7 +82,7 @@ fn move_circularly_double() {
         let mut start = p;
         let end = p;
 
-        for &dir in all_directions.iter() {
+        for &dir in ALL_DIRECTIONS.iter() {
             start = start + dir + dir;
         }
 
@@ -94,12 +94,12 @@ fn move_circularly_double() {
 fn position_make_circle() {
     with_test_points(|p : Point| {
         let start_p = p;
-        for &start_dir in all_directions.iter() {
+        for &start_dir in ALL_DIRECTIONS.iter() {
             for &side in [Left, Right].iter() {
                 for &front_or_back in [Forward, Backward].iter() {
                     let mut pos = Position::new(start_p, start_dir);
 
-                    for _ in all_directions.iter() {
+                    for _ in ALL_DIRECTIONS.iter() {
                         pos = pos + front_or_back + side;
                     }
 
@@ -114,7 +114,7 @@ fn position_make_circle() {
 #[test]
 fn next_step_must_be_neighbour() {
     with_test_points(|p : Point| {
-        for &dir in all_directions.iter() {
+        for &dir in ALL_DIRECTIONS.iter() {
             assert!(p.is_neighbor(p + dir));
         }
     });
@@ -123,7 +123,7 @@ fn next_step_must_be_neighbour() {
 #[test]
 fn next_two_steps_some_should_be_neighbour() {
     with_test_points(|p : Point| {
-        for &dir in all_directions.iter() {
+        for &dir in ALL_DIRECTIONS.iter() {
             assert!(!p.is_neighbor(p + dir + (dir + Left)));
             assert!(!p.is_neighbor(p + dir + (dir + Forward)));
             assert!(!p.is_neighbor(p + dir + (dir + Right)));
@@ -144,7 +144,7 @@ fn point_is_not_its_own_neighbor() {
 fn position_absolute() {
     let zero = Point::new(0,0);
     with_test_points(|p : Point| {
-        for &pos_dir in all_directions.iter() {
+        for &pos_dir in ALL_DIRECTIONS.iter() {
             let pos = Position::new(p, pos_dir);
             assert_eq!(pos.absolute(zero), p);
             for &side in [Right,Left,Forward].iter() {
@@ -170,7 +170,7 @@ fn position_absolute() {
 fn relative_absolute() {
 
     with_test_points(|p : Point| {
-        for &pos_dir in all_directions.iter() {
+        for &pos_dir in ALL_DIRECTIONS.iter() {
             let pos = Position {p: p, dir: pos_dir};
             with_test_points(|rp : Point| {
                 assert_eq!(pos.absolute(pos.relative(rp)), rp);

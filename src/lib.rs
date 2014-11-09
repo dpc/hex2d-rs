@@ -6,7 +6,7 @@
 #![license = "MIT"]
 #![crate_type = "lib"]
 
-#![warn(missing_doc)]
+#![warn(missing_docs)]
 
 //! Hexagonal map operations
 //!
@@ -71,7 +71,7 @@ pub enum AbsoluteDirection {
     NorthWest
 }
 
-pub static all_directions: [AbsoluteDirection, .. 6] = [North, NorthEast, SouthEast, South, SouthWest, NorthWest];
+pub static ALL_DIRECTIONS: [AbsoluteDirection, .. 6] = [North, NorthEast, SouthEast, South, SouthWest, NorthWest];
 
 
 /// Point on 2d hexagonal grid
@@ -282,7 +282,7 @@ impl AsAbsoluteDirection for AbsoluteDirection {
 
 impl PointAddable for AbsoluteDirection {
     fn add_to_point(&self, p : &Point ) -> Point {
-        p + self.to_relative_point()
+        *p + self.to_relative_point()
     }
 
     fn sub_from_point(&self, p : &Point) -> Point {
@@ -393,7 +393,7 @@ impl Point {
 
     /// Is `pt` an neighbor?
     pub fn is_neighbor(&self, pt: Point) -> bool {
-        let r = self - pt;
+        let r = *self - pt;
         match (r.x, r.y) {
             (0, -1)  => true,
             (0, 1)   => true,
@@ -414,14 +414,14 @@ impl Point {
 
     /// Translate `p` by `self`.
     pub fn translate(&self, p : Point) -> Point {
-        self + p
+        *self + p
     }
 
     /// List of neighbors
     pub fn neighbors(&self) -> [Point, ..6] {
         let p = self;
-        [p + North, p + NorthEast, p + SouthEast,
-        p + South, p + SouthWest, p + NorthWest]
+        [*p + North, *p + NorthEast, *p + SouthEast,
+        *p + South, *p + SouthWest, *p + NorthWest]
     }
 }
 
@@ -653,7 +653,7 @@ impl<T> Map<T> {
 
     /// Access given map tile (mutable)
     pub fn mut_at<'a>(&'a mut self, p : Point) -> &'a mut T {
-        self.tiles.get_mut(p.x as uint).get_mut(p.y as uint)
+        &mut self.tiles[p.x as uint][p.y as uint]
     }
 
     /// Wrap `p` over map size
