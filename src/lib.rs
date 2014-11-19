@@ -30,6 +30,21 @@ extern crate rand;
 
 use num::Integer;
 use std::fmt;
+use std::num::SignedInt;
+
+use AbsoluteDirection::{
+    North,
+    NorthEast,
+    NorthWest,
+    SouthEast,
+    SouthWest,
+    South,
+};
+
+use Direction::{
+    Left, Right,
+    Backward, Forward,
+};
 
 #[cfg(test)]
 mod test;
@@ -523,8 +538,8 @@ impl Position {
             let mut pos_y = self.p.y;
             let mut p_x = p.x;
             let mut p_y = p.y;
-            let xdiff = std::num::abs(pos_x - p_x);
-            let ydiff = std::num::abs(pos_y - p_y);
+            let xdiff = (pos_x - p_x).abs();
+            let ydiff = (pos_y - p_y).abs();
 
             if xdiff > map.width as int / 2 {
                 if pos_x > p_x {

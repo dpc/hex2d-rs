@@ -3,8 +3,8 @@
 use super::Point;
 use super::Position;
 use super::ALL_DIRECTIONS;
-use super::{Forward,Backward,Left,Right};
-use super::{North,South,NorthWest,NorthEast,SouthWest,SouthEast};
+use super::Direction::{Forward,Backward,Left,Right};
+use super::AbsoluteDirection::{North,South,NorthWest,NorthEast,SouthWest,SouthEast};
 
 fn with_test_points(f : |p : Point|) {
     let offs = [-2, -1, 0, 1, 2];
