@@ -1,7 +1,7 @@
 [package]
 name = "hex2d"
-version = "0.0.2"
-authors = [ "dpc@ucore.info" ]
+version = "0.0.3"
+authors = [ "Dawid Ciężarkiewicz <dpc@ucore.info>" ]
 
 [lib]
 name = "hex2d"

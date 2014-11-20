@@ -6,6 +6,8 @@
 
 Library for working with 2d hex map systems.
 
+It might be lame, I have little time to take care of it. But patches are always welcome.
+
 ## Building 
 
     cargo build

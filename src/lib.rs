@@ -12,18 +12,16 @@
 //!
 //! The coordinate system is supposed to be similar to the one used usually on screens,
 //! which means y grows "downward" (well, southwest, really).
-//
-// ```ignore
-//
-//      (0,0) ----> x
-//       /   /N \
-//      /  NW\__/NE
-//     /  \__/  \__
-//    /   /SW\__/SE
-//   v       /S \__
-//  y
-//
-// ```
+//!
+//! ```notrust
+//!     (0,0) ----> x
+//!      /   /N \
+//!     /  NW\__/NE
+//!    /  \__/  \__
+//!   /   /SW\__/SE
+//!  v       /S \__
+//! y
+//! ```
 
 extern crate num;
 extern crate rand;
