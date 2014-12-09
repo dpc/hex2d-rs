@@ -2,8 +2,6 @@
 // See LICENSE file for more information
 
 #![crate_name = "hex2d"]
-#![comment = "Hexagonal map utility library"]
-#![license = "MIT"]
 #![crate_type = "lib"]
 
 #![warn(missing_docs)]

@@ -2,10 +2,12 @@
 name = "hex2d"
 version = "0.0.3"
 authors = [ "Dawid Ciężarkiewicz <dpc@ucore.info>" ]
+description = "Library for working with 2d hex map systems."
+license = "MIT"
 
 [lib]
 name = "hex2d"
 path = "src/lib.rs"
 
-[dependencies.num]
-git = "https://github.com/rust-lang/num"
+[dependencies]
+num = "0.0.5"
