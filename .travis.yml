@@ -1,7 +1,7 @@
 language: rust
 env:
   global:
-    - secure: TIg3aTRso+tmhwQhBXkB5kzwViYoLbVv/hsEX1MNtifa8rlQyvBPibmN1xLBsceX0BgEk54K/sqy8qSX4h04zoWXUlIQORwuojIzhi+nRC7KpBeMkIEIrUZdcOoRoEXFjE2wmbW2FUAQ1nCISwYwAbACdUSdPeXVISNRaN9b4NU=
+    - secure: IMU/4cuhC7xU0nN1hzZRE4DuWRWYvsUwTH9ujKOU6BpRFjY/GcYxx1lNLzf5ITw6ZZ5FupZZ8xCvwCBn6ozMobTkkEr9/5FlZnwEgn8FQsa14GYELeqE0ukA+onVTHZjYMO+kIC2Y+yezF4scUEPAWyZ4O8Xe90FjriLfkG8Duc=
 script:
   - make
 after_script:
