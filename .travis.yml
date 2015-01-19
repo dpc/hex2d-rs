@@ -1,10 +1,12 @@
 language: rust
+
 env:
   global:
-    - secure: IMU/4cuhC7xU0nN1hzZRE4DuWRWYvsUwTH9ujKOU6BpRFjY/GcYxx1lNLzf5ITw6ZZ5FupZZ8xCvwCBn6ozMobTkkEr9/5FlZnwEgn8FQsa14GYELeqE0ukA+onVTHZjYMO+kIC2Y+yezF4scUEPAWyZ4O8Xe90FjriLfkG8Duc=
+    - secure: irOA2gWfszfzZZDAgW0UpRa+cObStazm8LSZPJRj3QQk0rkDEavXslNpP6LBszsyvVJqpMewRbcLAPek8pGJUbngCyByPZM4tQ3TN4eargc75omq1s3ywagk2+VvfNkAH5LfveUVp/2sZBJUmmopolWinOfnXmzfrppyfCLgHJU=
+
 script:
-  - make
+  - make test doc
+
 after_script:
-  - cp -R target/doc doc
-  - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh
-  - rm -r doc
+  - mv target/doc/ doc/
+  - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | bash
