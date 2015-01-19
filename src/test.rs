@@ -6,7 +6,7 @@ use super::ALL_DIRECTIONS;
 use super::Direction::{Forward,Backward,Left,Right};
 use super::AbsoluteDirection::{North,South,NorthWest,NorthEast,SouthWest,SouthEast};
 
-fn with_test_points(f : |p : Point|) {
+fn with_test_points<F : Fn(Point) -> ()>(f : F) {
     let offs = [-2, -1, 0, 1, 2];
     for &x in offs.iter() {
         for &y in offs.iter() {
@@ -150,14 +150,14 @@ fn position_absolute() {
             for &side in [Right,Left,Forward].iter() {
                 let mut zero_dir = North;
                 let mut pos_dir = pos_dir;
-                for _ in range(0u, 6) {
+                for _ in range(0u32, 6) {
                     zero_dir = zero_dir + side;
                     pos_dir = pos_dir + side;
                 }
                 let mut zero_p = zero;
                 let mut pos_p = pos.p;
 
-                for _ in range(0u, 5) {
+                for _ in range(0u32, 5) {
                     zero_p = zero_p + zero_dir;
                     pos_p = pos_p + pos_dir;
                 }
@@ -166,6 +166,7 @@ fn position_absolute() {
         }
     });
 }
+
 #[test]
 fn relative_absolute() {
 
