@@ -14,5 +14,9 @@ license = "MIT"
 name = "hex2d"
 path = "src/lib.rs"
 
+#[[bin]]
+#name="simple"
+#path="examples/simple/main.rs"
+
 [dependencies]
 num = "*"

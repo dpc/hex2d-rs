@@ -3,6 +3,7 @@
 use super::Point;
 use super::Position;
 use super::ALL_DIRECTIONS;
+use super::PositionMove::{Step,Turn};
 use super::Direction::{Forward,Backward,Left,Right};
 use super::AbsoluteDirection::{North,South,NorthWest,NorthEast,SouthWest,SouthEast};
 
@@ -97,13 +98,13 @@ fn position_make_circle() {
         for &start_dir in ALL_DIRECTIONS.iter() {
             for &side in [Left, Right].iter() {
                 for &front_or_back in [Forward, Backward].iter() {
-                    let mut pos = Position::new(start_p, start_dir);
+                    let mut pos = start_p.to_position(start_dir);
 
                     for _ in ALL_DIRECTIONS.iter() {
-                        pos = pos + front_or_back + side;
+                        pos = pos + Step(front_or_back) + Turn(side);
                     }
 
-                    assert_eq!(pos, Position::new(start_p, start_dir));
+                    assert_eq!(pos, start_p.to_position(start_dir));
                 }
             }
         }
@@ -145,7 +146,7 @@ fn position_absolute() {
     let zero = Point::new(0,0);
     with_test_points(|p : Point| {
         for &pos_dir in ALL_DIRECTIONS.iter() {
-            let pos = Position::new(p, pos_dir);
+            let pos = p.to_position(pos_dir);
             assert_eq!(pos.absolute(zero), p);
             for &side in [Right,Left,Forward].iter() {
                 let mut zero_dir = North;

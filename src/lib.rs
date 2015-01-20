@@ -31,7 +31,7 @@ use std::fmt;
 use std::ops::{Add, Neg, Sub};
 use std::rand::Rand;
 
-use AbsoluteDirection::{
+pub use AbsoluteDirection::{
     North,
     NorthEast,
     NorthWest,
@@ -40,15 +40,17 @@ use AbsoluteDirection::{
     South,
 };
 
-use Direction::{
+pub use Direction::{
     Left, Right,
     Backward, Forward,
 };
 
+pub use PositionMove::{Turn, Step};
+
 #[cfg(test)]
 mod test;
 
-/// Relative direction
+/// Direction - relative to AbsoluteDirection
 #[derive(Copy)]
 #[derive(Clone)]
 #[derive(Show)]
@@ -63,6 +65,16 @@ pub enum Direction {
     Right,
     /// Left-Forward
     Left
+}
+
+/// Possible action modifying a Position
+#[derive(Copy)]
+#[derive(Show)]
+pub enum PositionMove {
+    /// Turn, without moving, by turning in a given relative direction
+    Turn(Direction),
+    /// Move in a direction, without relative to currently facing direction without turning
+    Step(Direction),
 }
 
 /// Absolute direction
@@ -181,24 +193,24 @@ pub trait Rotatable {
 }
 
 /// Can be translated
-pub trait Translatable {
+pub trait Translatable<I : Int> {
     /// Translate by `p`
-    fn translate_by(self, p : Point) -> Self;
+    fn translate_by(self, p : Point<I>) -> Self;
 }
 
-impl<I : Int> PositionAddable<I> for Direction {
+impl<I : Int> PositionAddable<I> for PositionMove {
     fn add_to_position(self, pos : Position<I>) -> Position<I> {
         match self {
-            Right|Left =>
+            Turn(dir) =>
                 Position {
                     p : pos.p,
-                    dir : pos.dir + self
+                    dir : pos.dir + dir
                 },
-                Forward|Backward =>
-                    Position {
-                        p : pos.p + (pos.dir + self),
-                        dir: pos.dir
-                    }
+            Step(dir) =>
+                Position {
+                    p : pos.p + (pos.dir + dir),
+                    dir: pos.dir
+                }
         }
     }
 }
@@ -276,7 +288,7 @@ impl AbsoluteDirection {
         }
     }
 
-    /// Translate absolute Point i32o relative Point in relation to self.
+    /// Translate absolute Point into relative Point in relation to self.
     pub fn relative
         <T : Rotatable>
         (&self, d : T) -> T {
@@ -343,14 +355,14 @@ impl<I : Int+Rand> rand::Rand for Point<I> {
     }
 }
 
-impl Translatable for Point {
-    fn translate_by(self, p : Point) -> Point {
+impl<I : Int> Translatable<I> for Point<I> {
+    fn translate_by(self, p : Point<I>) -> Point<I> {
         p + self
     }
 }
 
-impl Rotatable for Point {
-    fn rotate_by(self, dir : AbsoluteDirection) -> Point {
+impl<S : SignedInt> Rotatable for Point<S> {
+    fn rotate_by(self, dir : AbsoluteDirection) -> Point<S> {
         match *dir.as_direction() {
             North => Point {
                 x: self.x,
@@ -380,8 +392,8 @@ impl Rotatable for Point {
     }
 }
 
-impl Rotatable for Position {
-    fn rotate_by(self, dir : AbsoluteDirection) -> Position {
+impl<S : SignedInt> Rotatable for Position<S> {
+    fn rotate_by(self, dir : AbsoluteDirection) -> Position<S> {
         Position {
             p: self.p.rotate_by(dir),
             dir: self.dir.rotate_by(dir),
@@ -389,8 +401,8 @@ impl Rotatable for Position {
     }
 }
 
-impl Translatable for Position {
-    fn translate_by(self, p : Point) -> Position {
+impl<I : Int> Translatable<I> for Position<I> {
+    fn translate_by(self, p : Point<I>) -> Position<I> {
         Position {
             p: self.p.translate_by(p),
             dir: self.dir,
@@ -422,6 +434,11 @@ impl<I : Int+ToPrimitive> Point<I> {
     /// Construct `Point` from `x` and `y` coordinates
     pub fn new(x : I, y : I) -> Point<I> {
         Point { x: x, y: y }
+    }
+
+    /// Construct `Position` from `Point` and `AbsoluteDirection`
+    pub fn to_position(&self, d : AbsoluteDirection) -> Position<I> {
+        Position { p: *self, dir: d }
     }
 
     /// Is `pt` an neighbor?
@@ -514,91 +531,97 @@ impl<I : Int> PositionAddable<I> for Point<I> {
     }
 }
 
-impl AsPoint for Point {
-    fn as_point<'a>(&'a self) -> &'a Point {
+impl<I : Int> AsPoint<I> for Point<I> {
+    fn as_point<'a>(&'a self) -> &'a Point<I> {
         self
     }
 }
 
-impl AsMutPoint for Point {
-    fn as_mut_point<'a>(&'a mut self) -> &'a mut Point {
+impl<I : Int> AsMutPoint<I> for Point<I> {
+    fn as_mut_point<'a>(&'a mut self) -> &'a mut Point<I> {
         self
     }
 }
 
-impl fmt::Show for Point {
+impl<I : Int+fmt::Show> fmt::Show for Point<I> {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "({}, {})", self.x, self.y)
+        write!(f, "({:?}, {:?})", self.x, self.y)
     }
 }
 
-impl Position {
-    /// Construct `Position` from `Point` and `AbsoluteDirection`
-    pub fn new(p : Point, dir : AbsoluteDirection) -> Position {
-        Position { p: p, dir: dir }
-    }
-
+impl<I : Int> Position<I> {
     /// Construct `Position` from `x`, `y`, and `AbsoluteDirection`
-    pub fn new2(x : i32, y : i32, dir : AbsoluteDirection) -> Position {
+    pub fn new(x : I, y : I, dir : AbsoluteDirection) -> Position<I> {
         Position { p : Point {x: x, y: y}, dir: dir }
     }
+}
 
-    /**
-      Translate relative Point in relation to self i32o absolute Point.
-     **/
-    pub fn absolute
-        <T : Rotatable+Translatable>
-        (&self, p : T) -> T {
-            p.rotate_by(self.dir).translate_by(self.p)
-        }
-
-    /// Translate absolute Point i32o relative Point in relation to self.
-    pub fn relative
-        <T : Rotatable+Translatable>
-        (&self, p : T) -> T {
-            p.translate_by(-self.p).rotate_by(self.dir.negative_rot())
-        }
-
-    /// Translate absolute Point i32o relative Point in relation to self
-    /// taking i32o account that the pointers could have been wrapped by
+impl<S : SignedInt+ToPrimitive+FromPrimitive> Position<S> {
+    /// Translate absolute Point into relative Point in relation to self
+    /// taking into account that the pointers could have been wrapped by
     /// map size already.
     pub fn relative_wrapped
-        <U, T : Rotatable+Translatable+AsMutPoint+AsPoint+Clone>
+        <U:ToPrimitive, T : Rotatable+Translatable<S>+AsMutPoint<S>+AsPoint<S>+Clone>
         (&self, map : &Map<U>, t : T) -> T
         {
             let p = t.as_point();
-            let mut pos_x = self.p.x;
-            let mut pos_y = self.p.y;
-            let mut p_x = p.x;
-            let mut p_y = p.y;
+            let mut pos_x = self.p.x.to_i64().unwrap();
+            let mut pos_y = self.p.y.to_i64().unwrap();
+            let mut p_x = p.x.to_i64().unwrap();
+            let mut p_y = p.y.to_i64().unwrap();
             let xdiff = (pos_x - p_x).abs();
             let ydiff = (pos_y - p_y).abs();
 
-            if xdiff > map.width as i32 / 2 {
+            let map_w = map.width.to_i64().unwrap();
+            let map_h = map.width.to_i64().unwrap();
+
+            if xdiff > map_w / 2 {
                 if pos_x > p_x {
-                    pos_x = pos_x - map.width as i32;
+                    pos_x = pos_x - map_w;
                 } else {
-                    p_x = p_x - map.width as i32;
+                    p_x = p_x - map_w;
                 }
             }
 
-            if ydiff > map.height as i32 / 2 {
+            if ydiff > map_h / 2 {
                 if pos_y > p_y {
-                    pos_y = pos_y - map.height as i32;
+                    pos_y = pos_y - map_h;
                 } else {
-                    p_y = p_y - map.height as i32;
+                    p_y = p_y - map_h;
                 }
             }
 
-            let pos = Position::new(Point{x: pos_x, y: pos_y}, self.dir);
+            let pos = Point{
+                x: FromPrimitive::from_i64(pos_x).unwrap(),
+                y: FromPrimitive::from_i64(pos_y).unwrap()
+            }.to_position(self.dir);
+
             let mut p = t.clone();
-            p.as_mut_point().x = p_x;
-            p.as_mut_point().y = p_y;
+            p.as_mut_point().x = FromPrimitive::from_i64(p_x).unwrap();
+            p.as_mut_point().y = FromPrimitive::from_i64(p_y).unwrap();
 
             pos.relative::<T>(p)
         }
 }
 
+impl<S : SignedInt> Position<S> {
+    /**
+      Translate relative Point in relation to self into absolute Point.
+     **/
+    pub fn absolute
+        <T : Rotatable+Translatable<S>>
+        (&self, p : T) -> T {
+            p.rotate_by(self.dir).translate_by(self.p)
+        }
+
+
+    /// Translate absolute Point into relative Point in relation to self.
+    pub fn relative
+        <T : Rotatable+Translatable<S>>
+        (&self, p : T) -> T {
+            p.translate_by(-self.p).rotate_by(self.dir.negative_rot())
+        }
+}
 
 impl<I : Int+ToPrimitive, U : UnsignedInt+FromPrimitive> MapWrappable<U> for Position<I> {
     type Output = Position<U>;
@@ -608,34 +631,34 @@ impl<I : Int+ToPrimitive, U : UnsignedInt+FromPrimitive> MapWrappable<U> for Pos
     }
 }
 
-impl<T: PositionAddable> Add<T> for Position {
-    type Output = Position;
+impl<I : Int, T: PositionAddable<I>> Add<T> for Position<I> {
+    type Output = Position<I>;
 
-    fn add(self, p : T) -> Position {
+    fn add(self, p : T) -> Position<I> {
         p.add_to_position(self)
     }
 }
 
-impl fmt::Show for Position {
+impl<I : Int+fmt::Show> fmt::Show for Position<I> {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         write!(f, "({:?}, {:?})", self.p, self.dir)
     }
 }
 
-impl rand::Rand for Position {
-    fn rand<R: rand::Rng>(rng: &mut R) ->  Position {
+impl<I : Int+Rand> rand::Rand for Position<I> {
+    fn rand<R: rand::Rng>(rng: &mut R) ->  Position<I> {
         Position {
             dir: rng.gen::<AbsoluteDirection>(),
-            p: rng.gen::<Point>(),
+            p: rng.gen::<Point<I>>(),
         }
     }
 }
 
 
-impl Neg for Position {
-    type Output = Position;
+impl<S : SignedInt> Neg for Position<S> {
+    type Output = Position<S>;
 
-    fn neg(self) -> Position {
+    fn neg(self) -> Position<S> {
         Position {
             p : self.p,
             dir : -self.dir
@@ -643,28 +666,28 @@ impl Neg for Position {
     }
 }
 
-impl AsAbsoluteDirection for Position {
+impl<I : Int> AsAbsoluteDirection for Position<I> {
     fn as_direction<'a>(&'a self) -> &'a AbsoluteDirection {
         &self.dir
     }
 }
 
 
-impl AsPoint for Position {
-    fn as_point<'a>(&'a self) -> &'a Point {
+impl<I : Int> AsPoint<I> for Position<I> {
+    fn as_point<'a>(&'a self) -> &'a Point<I> {
         &self.p
     }
 }
 
-impl AsMutAbsoluteDirection for Position {
+impl<I : Int> AsMutAbsoluteDirection for Position<I> {
     fn as_mut_direction<'a>(&'a mut self) -> &'a mut AbsoluteDirection {
         &mut self.dir
     }
 }
 
 
-impl AsMutPoint for Position {
-    fn as_mut_point<'a>(&'a mut self) -> &'a mut Point {
+impl<I : Int> AsMutPoint<I> for Position<I> {
+    fn as_mut_point<'a>(&'a mut self) -> &'a mut Point<I> {
         &mut self.p
     }
 }
