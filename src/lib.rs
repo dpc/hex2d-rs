@@ -53,7 +53,7 @@ mod test;
 /// Direction - relative to AbsoluteDirection
 #[derive(Copy)]
 #[derive(Clone)]
-#[derive(Show)]
+#[derive(Debug)]
 #[derive(Eq)]
 #[derive(PartialEq)]
 pub enum Direction {
@@ -69,7 +69,7 @@ pub enum Direction {
 
 /// Possible action modifying a Position
 #[derive(Copy)]
-#[derive(Show)]
+#[derive(Debug)]
 pub enum PositionMove {
     /// Turn, without moving, by turning in a given relative direction
     Turn(Direction),
@@ -80,7 +80,7 @@ pub enum PositionMove {
 /// Absolute direction
 #[derive(Clone)]
 #[derive(Copy)]
-#[derive(Show)]
+#[derive(Debug)]
 #[derive(Eq)]
 #[derive(PartialEq)]
 #[derive(FromPrimitive)]
@@ -543,7 +543,7 @@ impl<I : Int> AsMutPoint<I> for Point<I> {
     }
 }
 
-impl<I : Int+fmt::Show> fmt::Show for Point<I> {
+impl<I : Int+fmt::Debug> fmt::Debug for Point<I> {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         write!(f, "({:?}, {:?})", self.x, self.y)
     }
@@ -639,7 +639,7 @@ impl<I : Int, T: PositionAddable<I>> Add<T> for Position<I> {
     }
 }
 
-impl<I : Int+fmt::Show> fmt::Show for Position<I> {
+impl<I : Int+fmt::Debug> fmt::Debug for Position<I> {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         write!(f, "({:?}, {:?})", self.p, self.dir)
     }
