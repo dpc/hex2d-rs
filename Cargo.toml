@@ -1,6 +1,6 @@
 [package]
 name = "hex2d"
-version = "0.0.4"
+version = "0.0.5"
 authors = [ "Dawid Ciężarkiewicz <dawid@dpc.pw>" ]
 description = "Helper library for working with 2d hex-grid maps"
 documentation = "http://www.rust-ci.org/dpc/hex2d-rs/doc/hex2d/"
@@ -13,10 +13,6 @@ license = "MIT"
 [lib]
 name = "hex2d"
 path = "src/lib.rs"
-
-#[[bin]]
-#name="simple"
-#path="examples/simple/main.rs"
 
 [dependencies]
 num = "*"

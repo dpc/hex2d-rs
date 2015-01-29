@@ -1,2 +1,2 @@
 PKG_NAME=hex2d
-DEFAULT_TARGET=test simple
+DEFAULT_TARGET=test
