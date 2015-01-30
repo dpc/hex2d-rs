@@ -150,7 +150,7 @@ pub enum Spin {
     CCW(Direction),
 }
 
-/// Graphical representation of a Hex tile
+/// Floating point tile size for pixel conversion functions
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum Spacing {
     /// Hex-grid with an edge on top
@@ -159,16 +159,16 @@ pub enum Spacing {
     PointyTop(f32),
 }
 
-/// Ascii representation of a Hex tile
+/// Integer pixel tile size for integer pixel conversion functions
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
-pub enum AsciiSpacing<I> {
+pub enum IntegerSpacing<I> {
     /// Hex-grid with an edge on top
     FlatTop(I, I),
     /// Hex-grid with a corner on top
     PointyTop(I, I),
 }
 
-impl<I : SignedInt+FromPrimitive> Coordinate<I> {
+impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
     /// Create new Coord from `x` and `y`
     pub fn new(x : I, y : I) -> Coordinate<I> {
         Coordinate { x: x, y: y, z: -x - y }.invariant()
@@ -297,8 +297,12 @@ impl<I : SignedInt+FromPrimitive> Coordinate<I> {
     }
 
     /// Convert to pixel coordinates using `spacing`, where the
-    /// parameter means the edge length of a hexagon
-    pub fn to_pixel(&self, spacing : Spacing) -> (f32, f32) {
+    /// parameter means the edge length of a hexagon.
+    ///
+    /// This function is meant for graphical user interfaces
+    /// where resolution is big enough that floating point calculation
+    /// make sense.
+    pub fn to_pixel_float(&self, spacing : Spacing) -> (f32, f32) {
         let q = self.x.to_f32().unwrap();
         let r = self.z.to_f32().unwrap();
         match spacing {
@@ -313,24 +317,53 @@ impl<I : SignedInt+FromPrimitive> Coordinate<I> {
         }
     }
 
-
-    /// Convert to ascii pixel coordinates using `spacing`, where the
-    /// parameters means the width and height multiplications
-    pub fn to_ascii_pixel(&self, spacing : AsciiSpacing<I>) -> (I, I) {
+    /// Convert to integer pixel coordinates using `spacing`, where the
+    /// parameters mean the width and height multiplications
+    pub fn to_pixel_integer(&self, spacing : IntegerSpacing<I>) -> (I, I) {
         let q = self.x;
         let r = self.z;
         let two = FromPrimitive::from_i8(2).unwrap();
 
         match spacing {
-            AsciiSpacing::FlatTop(w, h) => (
+            IntegerSpacing::FlatTop(w, h) => (
                 w * q,
                 h * (r + r + q) / two
                 ),
-            AsciiSpacing::PointyTop(w, h) => (
+            IntegerSpacing::PointyTop(w, h) => (
                 w * (q + q + r) / two,
                 h * r
                 )
         }
+    }
+
+    /// Convert integer pixel coordinates `v` using `spacing` to nearest coordinate that has both
+    /// integer pixel coordinates lower or equal to `v`. Also return offset (in integer pixels)
+    /// from that coordinate.
+    // Took me a while to figure this out, but it seems to work. Brilliant.
+    pub fn from_pixel_integer(spacing : IntegerSpacing<I>, v : (I, I)) -> (Coordinate<I>, (I, I)) {
+        let (asc_x, asc_y) = v;
+
+        let two : I = FromPrimitive::from_i8(2).unwrap();
+
+        let ((q, qo),(r, ro)) = match spacing {
+            IntegerSpacing::FlatTop(w, h) => (
+                (asc_x.div_floor(&w), asc_x.mod_floor(&w)),
+                (
+                    (asc_y - h * asc_x.div_floor(&w) / two).div_floor(&h),
+                    (asc_y + h / two * asc_x.div_floor(&w)).mod_floor(&h)
+                )
+                ),
+            IntegerSpacing::PointyTop(w, h) => (
+                (
+                    (asc_x - w * asc_y.div_floor(&h) / two).div_floor(&w),
+                    (asc_x + w / two * asc_y.div_floor(&h)).mod_floor(&w)
+                ),
+                (asc_y.div_floor(&h),  asc_y.mod_floor(&h))
+                ),
+        };
+
+        let coord = Coordinate{ x: q, y: -q - r, z: r };
+        (coord, (qo, ro))
     }
 }
 
@@ -341,14 +374,14 @@ impl<I : SignedInt> ToCoordinate<I> for Coordinate<I> {
 }
 
 
-impl<I : SignedInt+FromPrimitive> ToCoordinate<I> for (I, I) {
+impl<I : SignedInt+FromPrimitive+Integer> ToCoordinate<I> for (I, I) {
     fn to_coordinate(&self) -> Coordinate<I> {
         let (x, y) = *self;
         Coordinate::new(x, y)
     }
 }
 
-impl<I : SignedInt+FromPrimitive> ToCoordinate<I> for Direction {
+impl<I : SignedInt+FromPrimitive+Integer> ToCoordinate<I> for Direction {
     fn to_coordinate(&self) -> Coordinate<I> {
         let (x, y, z) = match *self {
             YZ => (0, 1, -1),
@@ -368,7 +401,7 @@ impl<I : SignedInt+FromPrimitive> ToCoordinate<I> for Direction {
 }
 
 
-impl<I : SignedInt+FromPrimitive, T: ToCoordinate<I>> Add<T> for Coordinate<I> {
+impl<I : SignedInt+FromPrimitive+Integer, T: ToCoordinate<I>> Add<T> for Coordinate<I> {
     type Output = Coordinate<I>;
 
     fn add(self, c : T) -> Coordinate<I> {
@@ -382,7 +415,7 @@ impl<I : SignedInt+FromPrimitive, T: ToCoordinate<I>> Add<T> for Coordinate<I> {
     }
 }
 
-impl<I : SignedInt+FromPrimitive, T: ToCoordinate<I>> Sub<T> for Coordinate<I> {
+impl<I : SignedInt+FromPrimitive+Integer, T: ToCoordinate<I>> Sub<T> for Coordinate<I> {
     type Output = Coordinate<I>;
 
     fn sub(self, c : T) -> Coordinate<I> {
@@ -396,7 +429,7 @@ impl<I : SignedInt+FromPrimitive, T: ToCoordinate<I>> Sub<T> for Coordinate<I> {
     }
 }
 
-impl<I : SignedInt+FromPrimitive> Neg for Coordinate<I> {
+impl<I : SignedInt+FromPrimitive+Integer> Neg for Coordinate<I> {
     type Output = Coordinate<I>;
 
     fn neg(self) -> Coordinate<I> {

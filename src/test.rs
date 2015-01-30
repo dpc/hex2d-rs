@@ -8,11 +8,12 @@ use super::Direction::*;
 use super::Direction;
 use super::Angle::*;
 use super::Spacing::*;
+use super::IntegerSpacing;
 
 use super::ToCoordinate;
 
 fn with_test_points<F : Fn(Coordinate) -> ()>(f : F) {
-    let offs = [-2, -1, 0, 1, 2, 1000];
+    let offs = [-2, -1, 0, 1, 2, 1000,-1000,1001,-1001];
     for &x in offs.iter() {
         for &y in offs.iter() {
             let p = Coordinate::new(x, y);
@@ -187,12 +188,28 @@ fn simple_to_pixel() {
 
     {
         let c = Coordinate::new(0, 0);
-        assert_eq!(c.to_pixel(p_spacing), (0f32, 0f32));
-        assert_eq!(c.to_pixel(f_spacing), (0f32, 0f32));
+        assert_eq!(c.to_pixel_float(p_spacing), (0f32, 0f32));
+        assert_eq!(c.to_pixel_float(f_spacing), (0f32, 0f32));
     }
 
-    assert_eq!((2i32, -1i32).to_coordinate().to_pixel(f_spacing), (6f32, 0f32));
-    assert_eq!((-2i32, 1i32).to_coordinate().to_pixel(f_spacing), (-6f32, 0f32));
-    assert_eq!((1i32, 1i32).to_coordinate().to_pixel(p_spacing), (0f32, -6f32));
-    assert_eq!((2i32, 2i32).to_coordinate().to_pixel(p_spacing), (0f32, -12f32));
+    assert_eq!((2i32, -1i32).to_coordinate().to_pixel_float(f_spacing), (6f32, 0f32));
+    assert_eq!((-2i32, 1i32).to_coordinate().to_pixel_float(f_spacing), (-6f32, 0f32));
+    assert_eq!((1i32, 1i32).to_coordinate().to_pixel_float(p_spacing), (0f32, -6f32));
+    assert_eq!((2i32, 2i32).to_coordinate().to_pixel_float(p_spacing), (0f32, -12f32));
 }
+
+#[test]
+fn simple_from_pixel() {
+    for &spacing in [
+        IntegerSpacing::PointyTop(2, 1),
+        IntegerSpacing::PointyTop(4, 6),
+        IntegerSpacing::FlatTop(3, 2),
+    ].iter() {
+        with_test_points(|c : Coordinate| {
+            let ascii_pix = c.to_pixel_integer(spacing);
+            let (coord, pix_off) = Coordinate::from_pixel_integer(spacing, ascii_pix);
+            assert_eq!((c, (0, 0)), (coord, pix_off));
+        });
+    }
+}
+
