@@ -96,22 +96,24 @@ fn move_circularly_double() {
 
 #[test]
 fn coord_range() {
-    let c = Coordinate::new(0, 0);
-    assert_eq!(1, c.range(0).len());
-    assert_eq!(7, c.range(1).len());
-    assert_eq!(19, c.range(2).len());
-    assert_eq!(37, c.range(3).len());
-    assert_eq!((5 + 6 + 7 + 8 ) * 2 + 9, c.range(4).len());
+    with_test_points(|c : Coordinate| {
+        assert_eq!(1, c.range(0).len());
+        assert_eq!(7, c.range(1).len());
+        assert_eq!(19, c.range(2).len());
+        assert_eq!(37, c.range(3).len());
+        assert_eq!((5 + 6 + 7 + 8 ) * 2 + 9, c.range(4).len());
+    });
 }
 
 #[test]
 fn range_distance() {
-    let c = Coordinate::new(0, 0);
-    for r in range(0, 10) {
-        for p in c.range(r).iter() {
-            assert!(p.distance(c) <= r);
+    with_test_points(|c : Coordinate| {
+        for r in range(0, 10) {
+            for p in c.range(r).iter() {
+                assert!(p.distance(c) <= r);
+            }
         }
-    }
+    });
 }
 
 #[test]

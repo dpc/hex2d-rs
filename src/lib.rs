@@ -236,7 +236,11 @@ impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
         for x in range(-r, r + one) {
             for y in range(max(-r, -x-r), min(r, -x+r) + one) {
                 let z = -x - y;
-                f(Coordinate{ x: x, y: y, z: z}.invariant());
+                f(Coordinate{
+                    x: self.x + x,
+                    y: self.y + y,
+                    z: self.z + z
+                }.invariant());
             }
         }
     }
