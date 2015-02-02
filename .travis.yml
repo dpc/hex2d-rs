@@ -2,7 +2,7 @@ language: rust
 
 env:
   global:
-    - secure: irOA2gWfszfzZZDAgW0UpRa+cObStazm8LSZPJRj3QQk0rkDEavXslNpP6LBszsyvVJqpMewRbcLAPek8pGJUbngCyByPZM4tQ3TN4eargc75omq1s3ywagk2+VvfNkAH5LfveUVp/2sZBJUmmopolWinOfnXmzfrppyfCLgHJU=
+    - secure: TFQEAxmJUoYeTeuj2J4tt5EYfmrazQjYVcIanYYACNsipnDIwsCPCqjXkjXnC4jJoF/xUSRk8nBrBY9uJbQQqL0/2U1eZCpI59/agL8xMgvS26YC1tbbscNyy3F5p+8/EcFj6RPitfOErEJ8nTAJyCheM46cJySgLPy9dxwX6dE=
 
 script:
   - make test doc
