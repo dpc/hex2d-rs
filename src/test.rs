@@ -215,3 +215,58 @@ fn simple_from_pixel() {
     }
 }
 
+#[test]
+fn simple_rotations_around_zero() {
+        with_test_points(|c : Coordinate| {
+            assert_eq!(c, c.rotate_around_zero(Left).rotate_around_zero(Right));
+            assert_eq!(c.rotate_around_zero(LeftBack),
+            c.rotate_around_zero(Left).rotate_around_zero(Left));
+            assert_eq!(c.rotate_around_zero(RightBack),
+            c.rotate_around_zero(Right).rotate_around_zero(Right));
+            assert_eq!(
+                c.rotate_around_zero(Back),
+                c.rotate_around_zero(Right)
+                .rotate_around_zero(Right)
+                .rotate_around_zero(Right)
+            );
+            assert_eq!(
+                c.rotate_around_zero(Back),
+                c.rotate_around_zero(Left)
+                .rotate_around_zero(Left)
+                .rotate_around_zero(Left)
+            );
+            assert_eq!(
+                c.rotate_around_zero(Back),
+                -c
+                );
+        });
+}
+
+#[test]
+fn simple_rotations_around() {
+        with_test_points(|c : Coordinate| {
+            with_test_points(|p : Coordinate| {
+                assert_eq!(p, p.rotate_around(c, Left).rotate_around(c, Right));
+                assert_eq!(
+                    p.rotate_around(c, LeftBack),
+                    p.rotate_around(c, Left).rotate_around(c, Left)
+                    );
+                assert_eq!(
+                    p.rotate_around(c, RightBack),
+                    p.rotate_around(c, Right).rotate_around(c, Right)
+                    );
+                assert_eq!(
+                    p.rotate_around(c, Back),
+                    p.rotate_around(c, Right)
+                    .rotate_around(c, Right)
+                    .rotate_around(c, Right)
+                    );
+                assert_eq!(
+                    p.rotate_around(c, Back),
+                    p.rotate_around(c, Left)
+                    .rotate_around(c, Left)
+                    .rotate_around(c, Left)
+                    );
+            });
+        });
+}

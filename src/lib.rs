@@ -1,11 +1,58 @@
 // Copyright 2014 Dawid Ciężarkiewicz
 // See LICENSE file for more information
 
-//! Hexagonal map operations
+//! Hexagonal map operations utility library
 //!
 //! A lot of ideas taken from [redbloggames hexagon page][hexagon]
 //!
 //! [hexagon]: http://www.redblobgames.com/grids/hexagons/
+//!
+//! Pointy-topped:
+//!
+//! ```norust
+//!
+//!           /\
+//!         /    \
+//!        |      |
+//!        |      |
+//!         \    /
+//!           \/
+//!
+//!            -z
+//! +y     YZ  |  XZ     +x
+//!  ---       |       ---
+//!     ---    |    ---
+//!        --- | ---
+//!   YX      -x-    XY
+//!        --- | ---
+//!     ---    |    ---
+//!  ---   ZX  |  ZY   ---
+//! -x         |          -y
+//!            +z
+//!  ```
+//!
+//! Flat-topped:
+//!
+//! ```norust
+//!            ____
+//!           /    \
+//!          /      \
+//!          \      /
+//!           \____/
+//!
+//!        +y       -z
+//!         \       /
+//!          \ YZ  /
+//!       YX  \   /  XZ
+//!            \ /
+//!   -x--------x--------+x
+//!            / \
+//!       ZX  /   \ XY
+//!          /  ZY \
+//!         /       \
+//!        +z       -y
+//!  ```
+//!
 
 // TODO:
 // Implement Eq between (i, i) and (i, i, i) by using to_coordinate
@@ -32,54 +79,7 @@ use Spacing::*;
 #[cfg(test)]
 mod test;
 
-/// Cube Coordinateinates on 2d hexagonal grid
-///
-/// Point-topped:
-///
-/// ```norust
-///
-///           /\
-///         /    \
-///        |      |
-///        |      |
-///         \    /
-///           \/
-///
-///            -z
-/// +y     YZ  |  XZ     +x
-///  ---       |       ---
-///     ---    |    ---
-///        --- | ---
-///   YX      -x-    XY
-///        --- | ---
-///     ---    |    ---
-///  ---   ZX  |  ZY   ---
-/// -x         |          -y
-///            +z
-///  ```
-///
-/// Flat-topped:
-///
-/// ```norust
-///            ____
-///           /    \
-///          /      \
-///          \      /
-///           \____/
-///
-///        +y       -z
-///         \       /
-///          \ YZ  /
-///       YX  \   /  XZ
-///            \ /
-///   -x--------x--------+x
-///            / \
-///       ZX  /   \ XY
-///          /  ZY \
-///         /       \
-///        +z       -y
-///  ```
-///
+/// Coordinate on 2d hexagonal grid
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct Coordinate<I : SignedInt = i32> {
     /// `x` coordinate
@@ -96,13 +96,13 @@ pub trait ToCoordinate<I : SignedInt = i32> {
     fn to_coordinate(&self) -> Coordinate<I>;
 }
 
-/// Can be treated as a `Angle`
+/// Can be treated as an `Angle`
 pub trait ToAngle {
     /// Convert to `Angle` part of this data
     fn to_angle(&self) -> Angle;
 }
 
-/// Direction between `Coordinate`s
+/// Direction on a hexagonal map
 ///
 /// See `Coordinate` for graph with directions.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -127,17 +127,17 @@ static ALL_DIRECTIONS : [Direction; 6] = [ YZ, XZ, XY, ZY, ZX, YX ];
 /// Angle, relative to a Direction
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum Angle {
-    /// 0deg
+    /// 0deg clockwise
     Forward = 0,
-    /// 60deg
+    /// 60deg clockwise
     Right,
-    /// 120deg
+    /// 120deg clockwise
     RightBack,
-    /// 180deg
+    /// 180deg clockwise
     Back,
-    /// 240deg
+    /// 240deg clockwise
     LeftBack,
-    /// 300deg
+    /// 300deg clockwise
     Left,
 }
 
@@ -160,6 +160,11 @@ pub enum Spacing {
 }
 
 /// Integer pixel tile size for integer pixel conversion functions
+///
+/// Example values that give good results:
+///
+/// * FlatTop(3, 2)
+/// * PointyTop(2, 1)
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
 pub enum IntegerSpacing<I> {
     /// Hex-grid with an edge on top
@@ -201,7 +206,8 @@ impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
 
     /// Distance between two Coordinates
     pub fn distance(&self, c : Coordinate<I>) -> I {
-        ((self.x - c.x).abs() + (self.y - c.y).abs() + (self.z - c.z).abs()) / FromPrimitive::from_i8(2).unwrap()
+        ((self.x - c.x).abs() + (self.y - c.y).abs() + (self.z - c.z).abs())
+            / FromPrimitive::from_i8(2).unwrap()
     }
 
     /// All coordinates in radius `r`
@@ -212,21 +218,6 @@ impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
 
         res
     }
-/*
-    pub fn range(&self, r : I) -> Vec<Coordinate<I>> {
-        let mut res = vec!();
-        let one : I = FromPrimitive::from_i8(1).unwrap();
-
-        for x in range(-r, r + one) {
-            for y in range(max(-r, -x-r), min(r, -x+r) + one) {
-                let z = -x - y;
-                res.push(Coordinate{ x: x, y: y, z: z}.invariant());
-            }
-        }
-
-        res
-    }*/
-
 
     /// Execute `f` for all coordinates in radius `r`
     pub fn for_each_in_range<F>(&self, r : I, mut f : F)
@@ -250,7 +241,6 @@ impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
     /// Example: Elements in order for Ring of radius 2, Direction ZX, CCW
     ///
     /// ```norust
-    ///
     ///              8
     ///            9   7
     ///         10   .   6
@@ -260,7 +250,7 @@ impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
     ///          0   .   4
     ///            1   3
     ///              2
-    ///
+    /// ```
     pub fn ring(&self, r : i32, s : Spin) -> Vec<Coordinate<I>> {
         let mut res = vec!();
         self.for_each_in_ring(r, s, |c| res.push(c));
@@ -283,7 +273,6 @@ impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
             CW(d) => (RightBack, Right, d),
             CCW(d) => (LeftBack, Left, d),
         };
-
 
         let mut cur_coord = *self + start_dir.to_coordinate().scale(
             FromPrimitive::from_i32(r).unwrap()
@@ -369,6 +358,30 @@ impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
         let coord = Coordinate{ x: q, y: -q - r, z: r };
         (coord, (qo, ro))
     }
+
+    /// Rotate self around a point `(0, 0, 0)` using angle of rotation `a`
+    pub fn rotate_around_zero(&self, a : Angle) -> Coordinate<I> {
+
+        let (x, y, z) = (self.x, self.y, self.z);
+
+        let (x, y, z) = match a {
+            Forward => (x, y, z),
+            Right => (-z, -x, -y),
+            RightBack => (y, z, x),
+            Back => (-x, -y, -z),
+            LeftBack => (z, x, y),
+            Left => (-y, -z, -x),
+        };
+
+        Coordinate{ x: x, y: y, z: z }.invariant()
+    }
+
+    /// Rotate `self` around a `center` using angle of rotation `a`
+    pub fn rotate_around(&self, center : Coordinate<I>, a : Angle) -> Coordinate<I> {
+        let rel_p = *self - center;
+        let rot_p = rel_p.rotate_around_zero(a);
+        rot_p + center
+    }
 }
 
 impl<I : SignedInt> ToCoordinate<I> for Coordinate<I> {
@@ -376,7 +389,6 @@ impl<I : SignedInt> ToCoordinate<I> for Coordinate<I> {
         *self
     }
 }
-
 
 impl<I : SignedInt+FromPrimitive+Integer> ToCoordinate<I> for (I, I) {
     fn to_coordinate(&self) -> Coordinate<I> {
@@ -403,7 +415,6 @@ impl<I : SignedInt+FromPrimitive+Integer> ToCoordinate<I> for Direction {
         }.invariant()
     }
 }
-
 
 impl<I : SignedInt+FromPrimitive+Integer, T: ToCoordinate<I>> Add<T> for Coordinate<I> {
     type Output = Coordinate<I>;
@@ -447,7 +458,7 @@ impl Direction {
         &ALL_DIRECTIONS
     }
 
-    /// From integer
+    /// Create Direction from integer in [0, 6) range
     ///
     /// This should probably be internal
     pub fn from_int<I : Integer+FromPrimitive+ToPrimitive>(i : I) -> Direction {
@@ -462,7 +473,7 @@ impl Direction {
         }
     }
 
-    /// Convert to integer
+    /// Convert to integer in [0, 6) range
     ///
     /// This should probably be internal
     pub fn to_int<I : Integer+FromPrimitive>(&self) -> I {
@@ -471,7 +482,7 @@ impl Direction {
 }
 
 impl Angle {
-    /// From integer
+    /// Create Angle from integer in [0, 6) range
     ///
     /// This should probably be internal
     pub fn from_int<I : Integer+FromPrimitive+ToPrimitive>(i : I) -> Angle {
@@ -486,7 +497,7 @@ impl Angle {
         }
     }
 
-    /// Convert to integer
+    /// Convert to integer in [0, 6) range
     ///
     /// This should probably be internal
     pub fn to_int<I : Integer+FromPrimitive>(&self) -> I {
