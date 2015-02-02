@@ -6,28 +6,56 @@
 
 Library for working with 2d hex map systems.
 
-It might be lame, I've hacked it together for a toy game. But patches are
-always welcome. :)
+A lot of ideas taken from [redbloggames hexagon page][hexagon]
 
-To get some overview see [examples/simple.rs](examples/simple.rs).
-
-The coordinate system is supposed to be similar to the one used usually on
-screens, which means y grows "downward" (well, southwest, really).
-
-	    (0,0) ----> x
-	     /   /N \
-	    /  NW\__/NE
-	   /  \__/  \__
-	  /   /SW\__/SE
-	 v       /S \__
-	y
+[hexagon]: http://www.redblobgames.com/grids/hexagons/
 
 Read [Documentation](http://www.rust-ci.org/dpc/hex2d-rs/doc/hex2d/) for details.
 
+
+### Coordinate system
+
+Pointy-topped:
+
+             /\
+           /    \
+          |      |
+          |      |
+           \    /
+             \/
+
+              -z
+    +y     YZ  |  XZ     +x
+     ---       |       ---
+        ---    |    ---
+           --- | ---
+      YX      -x-    XY
+           --- | ---
+        ---    |    ---
+     ---   ZX  |  ZY   ---
+    -x         |          -y
+              +z
+
+Flat-topped:
+
+            ____
+           /    \
+          /      \
+          \      /
+           \____/
+
+         +y       -z
+          \       /
+           \ YZ  /
+        YX  \   /  XZ
+             \ /
+    -x--------x--------+x
+             / \
+        ZX  /   \ XY
+           /  ZY \
+          /       \
+         +z       -y
+
 ## Building
 
-	cargo build
-
-Run example:
-
-	cargo run --example simple
+    cargo build
