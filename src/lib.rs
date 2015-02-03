@@ -60,7 +60,8 @@
 #![crate_type = "lib"]
 
 #![warn(missing_docs)]
-#![allow(unstable)]
+#![feature(rand)]
+#![feature(hash)]
 
 extern crate num;
 extern crate rand;
