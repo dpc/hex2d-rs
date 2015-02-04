@@ -10,7 +10,7 @@ A lot of ideas taken from [redbloggames hexagon page][hexagon]
 
 [hexagon]: http://www.redblobgames.com/grids/hexagons/
 
-Read [Documentation](http://www.rust-ci.org/dpc/hex2d-rs/doc/hex2d/) for details.
+Read [Documentation](//dpc.github.io/hex2d-rs/doc) for details.
 
 
 ### Coordinate system
