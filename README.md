@@ -17,12 +17,12 @@ Read [Documentation](//dpc.github.io/hex2d-rs/doc) for details.
 
 Pointy-topped:
 
-             /\
-           /    \
-          |      |
-          |      |
-           \    /
-             \/
+              /\
+            /    \
+           |      |
+           |      |
+            \    /
+              \/
 
               -z
     +y     YZ  |  XZ     +x
@@ -38,11 +38,11 @@ Pointy-topped:
 
 Flat-topped:
 
-            ____
-           /    \
-          /      \
-          \      /
-           \____/
+             ____
+            /    \
+           /      \
+           \      /
+            \____/
 
          +y       -z
           \       /
