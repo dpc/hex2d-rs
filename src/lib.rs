@@ -62,6 +62,7 @@
 #![warn(missing_docs)]
 #![feature(rand)]
 #![feature(hash)]
+#![feature(core)]
 
 extern crate num;
 extern crate rand;
