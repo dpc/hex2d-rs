@@ -10,7 +10,7 @@ A lot of ideas taken from [redbloggames hexagon page][hexagon]
 
 [hexagon]: http://www.redblobgames.com/grids/hexagons/
 
-Read [Documentation](//dpc.github.io/hex2d-rs/doc/hex2d/index.html) for details.
+Read [Documentation](//dpc.github.io/hex2d-rs/) for details.
 
 See [issues](//github.com/dpc/hex2d-rs/issues/) for TODO and BUGs.
 
