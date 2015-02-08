@@ -193,6 +193,21 @@ impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
         Coordinate{ x: x, y: y, z: -x - y}.invariant()
     }
 
+    pub fn angle_from_center(&self) -> Option<Direction> {
+
+        let zero : I = FromPrimitive::from_i8(0).unwrap();
+
+        match (self.x > zero, self.y > zero, self.z > zero) {
+            (true, false, _) => Some(XY),
+            (false, true, _) => Some(YX),
+            (_, true, false) => Some(YZ),
+            (_, flase, true) => Some(ZY),
+            (true, _, flase) => Some(XZ),
+            (false, _, true) => Some(ZX),
+            _ => None,
+        }
+    }
+
     /// Array with all the neighbors of a coordinate
     pub fn neighbors(&self) -> [Coordinate<I>; 6] {
         [
