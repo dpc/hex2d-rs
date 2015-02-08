@@ -7,6 +7,7 @@ use super::Spin;
 use super::Direction::*;
 use super::Direction;
 use super::Angle::*;
+use super::Angle;
 use super::Spacing::*;
 use super::IntegerSpacing;
 
@@ -269,4 +270,47 @@ fn simple_rotations_around() {
                     );
             });
         });
+}
+
+#[test]
+fn simple_direction_from_center() {
+
+    let c = Coordinate::new(0, 0);
+
+    assert_eq!(c.direction_from_center_cw(), None);
+    assert_eq!(c.direction_from_center_ccw(), None);
+
+    for &dir in Direction::all().iter() {
+        assert_eq!((c + dir).direction_from_center_cw(), Some(dir));
+        assert_eq!((c + dir).direction_from_center_ccw(), Some(dir));
+        assert_eq!((c + dir + (dir + Left)).direction_from_center_cw(), Some(dir));
+        assert_eq!((c + dir + (dir + Right)).direction_from_center_ccw(), Some(dir));
+    }
+}
+
+#[test]
+fn simple_direction_to() {
+
+    with_test_points(|c : Coordinate| {
+        assert_eq!(c.direction_to_cw(c), None);
+        assert_eq!(c.direction_to_ccw(c), None);
+
+        for &dir in Direction::all().iter() {
+            assert_eq!(c.direction_to_cw(c + dir), Some(dir));
+            assert_eq!(c.direction_to_ccw(c + dir), Some(dir));
+            assert_eq!(c.direction_to_cw(c + dir + (dir + Left)), Some(dir));
+            assert_eq!(c.direction_to_ccw(c + dir + (dir + Right)), Some(dir));
+            assert_eq!(c.direction_to_cw(c + dir + (dir + Left) + dir + (dir + Left)), Some(dir));
+            assert_eq!(c.direction_to_ccw(c + dir + (dir + Right) + dir + (dir + Right)), Some(dir));
+        }
+    });
+}
+
+#[test]
+fn simple_direction_sub() {
+    for &dir in Direction::all().iter() {
+        for &angle in Angle::all().iter() {
+            assert_eq!((dir + angle) - dir, angle);
+        }
+    }
 }

@@ -97,6 +97,13 @@ pub trait ToCoordinate<I : SignedInt = i32> {
     fn to_coordinate(&self) -> Coordinate<I>;
 }
 
+/// Can be treated as a `Direction`
+pub trait ToDirection {
+    /// Convert to `Angle` part of this data
+    fn to_direction(&self) -> Direction;
+}
+
+
 /// Can be treated as an `Angle`
 pub trait ToAngle {
     /// Convert to `Angle` part of this data
@@ -124,6 +131,7 @@ pub enum Direction {
 
 // Use Direction::all() instead
 static ALL_DIRECTIONS : [Direction; 6] = [ YZ, XZ, XY, ZY, ZX, YX ];
+static ALL_ANGLES : [Angle; 6] = [ Forward, Right, RightBack, Back, LeftBack, Left];
 
 /// Angle, relative to a Direction
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -193,19 +201,86 @@ impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
         Coordinate{ x: x, y: y, z: -x - y}.invariant()
     }
 
-    pub fn angle_from_center(&self) -> Option<Direction> {
+    /// Direction from center `(0, 0)` to coordinate
+    ///
+    /// In case of diagonals (edge of two major directions), prefers direction that is clockwise
+    /// from the diagonal
+    ///
+    /// Returns:
+    /// None if is center
+    pub fn direction_from_center_cw(&self) -> Option<Direction> {
 
+        let x = self.x;
+        let y = self.y;
+        let z = self.z;
         let zero : I = FromPrimitive::from_i8(0).unwrap();
 
-        match (self.x > zero, self.y > zero, self.z > zero) {
-            (true, false, _) => Some(XY),
-            (false, true, _) => Some(YX),
-            (_, true, false) => Some(YZ),
-            (_, flase, true) => Some(ZY),
-            (true, _, flase) => Some(XZ),
-            (false, _, true) => Some(ZX),
-            _ => None,
+        let xy = if z < zero { x >= y } else { x > y };
+        let yz = if x < zero { y >= z } else { y > z };
+        let zx = if y < zero { z >= x } else { z > x };
+        match (xy, yz, zx) {
+            (true, true, false) => Some(XZ),
+            (true, false, false) => Some(XY),
+            (true, false, true) => Some(ZY),
+
+            (false, false, true) => Some(ZX),
+            (false, true, true) => Some(YX),
+            (false, true, false) => Some(YZ),
+            (false, false, false) => None,
+            (true, true, true) => panic!("You broke math"),
         }
+    }
+
+    /// Direction from center `(0, 0)` to coordinate
+    ///
+    /// In case of diagonals (edge of two major directions), prefers direction that is
+    /// counter-clockwise from the diagonal.
+    ///
+    /// Returns:
+    /// None if is center
+    pub fn direction_from_center_ccw(&self) -> Option<Direction> {
+
+        let x = self.x;
+        let y = self.y;
+        let z = self.z;
+        let zero : I = FromPrimitive::from_i8(0).unwrap();
+
+        let xy = if z > zero { x >= y } else { x > y };
+        let yz = if x > zero { y >= z } else { y > z };
+        let zx = if y > zero { z >= x } else { z > x };
+        match (xy, yz, zx) {
+            (true, true, false) => Some(XZ),
+            (true, false, false) => Some(XY),
+            (true, false, true) => Some(ZY),
+
+            (false, false, true) => Some(ZX),
+            (false, true, true) => Some(YX),
+            (false, true, false) => Some(YZ),
+            (false, false, false) => None,
+            (true, true, true) => panic!("You broke math"),
+        }
+    }
+
+    /// Direction from self to `pos`
+    ///
+    /// In case of diagonals (edge of two major directions), prefers direction that is clockwise
+    /// from the diagonal.
+    ///
+    /// Returns:
+    /// None if is center
+    pub fn direction_to_cw(&self, pos : Coordinate<I>) -> Option<Direction> {
+        (pos - *self).direction_from_center_cw()
+    }
+
+    /// Direction from self to `pos`
+    ///
+    /// In case of diagonals (edge of two major directions), prefers direction that is
+    /// counter-clockwise from the diagonal.
+    ///
+    /// Returns:
+    /// None if is center
+    pub fn direction_to_ccw(&self, pos : Coordinate<I>) -> Option<Direction> {
+        (pos - *self).direction_from_center_ccw()
     }
 
     /// Array with all the neighbors of a coordinate
@@ -497,7 +572,29 @@ impl Direction {
     }
 }
 
+impl ToDirection for Direction {
+    fn to_direction(&self) -> Direction {
+        *self
+    }
+}
+
+
+impl<T: ToDirection> Sub<T> for Direction {
+    type Output = Angle;
+
+    fn sub(self, c : T) -> Angle {
+        let c = c.to_direction();
+
+        Angle::from_int(self.to_int::<i8>() - c.to_int())
+    }
+}
+
 impl Angle {
+    /// Static array of all arrays
+    pub fn all() -> &'static [Angle; 6] {
+        &ALL_ANGLES
+    }
+
     /// Create Angle from integer in [0, 6) range
     ///
     /// This should probably be internal
