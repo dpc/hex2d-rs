@@ -9,10 +9,14 @@ Library for working with 2d hex map systems.
 A lot of ideas taken from [redbloggames hexagon page][hexagon]
 
 [hexagon]: http://www.redblobgames.com/grids/hexagons/
+[hex2d-rs]: http://github.com/dpc/hex2d-rs
+[hex2d-dpcext-rs]: http://github.com/dpc/hex2d-dpcext-rs
 
 Read [Documentation](//dpc.github.io/hex2d-rs/) for details.
 
 See [issues](//github.com/dpc/hex2d-rs/issues/) for TODO and BUGs.
+
+You might be interested in additional functionality provided by [hex2d-dpcext-rs] library.
 
 ### Coordinate system
 
