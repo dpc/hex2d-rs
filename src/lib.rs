@@ -60,7 +60,6 @@
 #![crate_type = "lib"]
 
 #![warn(missing_docs)]
-#![feature(rand)]
 #![feature(hash)]
 #![feature(core)]
 
@@ -87,8 +86,6 @@ pub struct Coordinate<I : SignedInt = i32> {
     pub x : I,
     /// `y` coordinate
     pub y : I,
-    /// `z` coordinate
-    pub z : I,
 }
 
 /// Can be treated as a `Coordinate`
@@ -185,20 +182,19 @@ pub enum IntegerSpacing<I> {
 impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
     /// Create new Coord from `x` and `y`
     pub fn new(x : I, y : I) -> Coordinate<I> {
-        Coordinate { x: x, y: y, z: -x - y }.invariant()
-    }
-
-    /// Check invariants
-    fn invariant(&self) -> Coordinate<I> {
-        debug_assert!(self.x + self.y == - self.z);
-        *self
+        Coordinate { x: x, y: y}
     }
 
     /// Scale coordinate by a factor `s`
     pub fn scale(&self, s : I) -> Coordinate<I> {
         let x = self.x * s;
         let y = self.y * s;
-        Coordinate{ x: x, y: y, z: -x - y}.invariant()
+        Coordinate{ x: x, y: y }
+    }
+
+    /// Z coordinate
+    pub fn z(&self) -> I {
+        -self.x - self.y
     }
 
     /// Direction from center `(0, 0)` to coordinate
@@ -212,7 +208,7 @@ impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
 
         let x = self.x;
         let y = self.y;
-        let z = self.z;
+        let z = self.z();
         let zero : I = FromPrimitive::from_i8(0).unwrap();
 
         let xy = if z < zero { x >= y } else { x > y };
@@ -242,7 +238,7 @@ impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
 
         let x = self.x;
         let y = self.y;
-        let z = self.z;
+        let z = self.z();
         let zero : I = FromPrimitive::from_i8(0).unwrap();
 
         let xy = if z > zero { x >= y } else { x > y };
@@ -297,7 +293,7 @@ impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
 
     /// Distance between two Coordinates
     pub fn distance(&self, c : Coordinate<I>) -> I {
-        ((self.x - c.x).abs() + (self.y - c.y).abs() + (self.z - c.z).abs())
+        ((self.x - c.x).abs() + (self.y - c.y).abs() + (self.z() - c.z()).abs())
             / FromPrimitive::from_i8(2).unwrap()
     }
 
@@ -317,12 +313,10 @@ impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
 
         for x in range(-r, r + one) {
             for y in range(max(-r, -x-r), min(r, -x+r) + one) {
-                let z = -x - y;
                 f(Coordinate{
                     x: self.x + x,
                     y: self.y + y,
-                    z: self.z + z
-                }.invariant());
+                });
             }
         }
     }
@@ -388,7 +382,7 @@ impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
     /// make sense.
     pub fn to_pixel_float(&self, spacing : Spacing) -> (f32, f32) {
         let q = self.x.to_f32().unwrap();
-        let r = self.z.to_f32().unwrap();
+        let r = self.z().to_f32().unwrap();
         match spacing {
             FlatTop(s) => (
                 s * 3f32 / 2f32 * q,
@@ -405,7 +399,7 @@ impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
     /// parameters mean the width and height multiplications
     pub fn to_pixel_integer(&self, spacing : IntegerSpacing<I>) -> (I, I) {
         let q = self.x;
-        let r = self.z;
+        let r = self.z();
         let two = FromPrimitive::from_i8(2).unwrap();
 
         match spacing {
@@ -446,25 +440,25 @@ impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
                 ),
         };
 
-        let coord = Coordinate{ x: q, y: -q - r, z: r };
+        let coord = Coordinate{ x: q, y: -q - r };
         (coord, (qo, ro))
     }
 
     /// Rotate self around a point `(0, 0, 0)` using angle of rotation `a`
     pub fn rotate_around_zero(&self, a : Angle) -> Coordinate<I> {
 
-        let (x, y, z) = (self.x, self.y, self.z);
+        let (x, y, z) = (self.x, self.y, self.z());
 
-        let (x, y, z) = match a {
-            Forward => (x, y, z),
-            Right => (-z, -x, -y),
-            RightBack => (y, z, x),
-            Back => (-x, -y, -z),
-            LeftBack => (z, x, y),
-            Left => (-y, -z, -x),
+        let (x, y) = match a {
+            Forward => (x, y),
+            Right => (-z, -x),
+            RightBack => (y, z),
+            Back => (-x, -y),
+            LeftBack => (z, x),
+            Left => (-y, -z),
         };
 
-        Coordinate{ x: x, y: y, z: z }.invariant()
+        Coordinate{ x: x, y: y}
     }
 
     /// Rotate `self` around a `center` using angle of rotation `a`
@@ -490,20 +484,19 @@ impl<I : SignedInt+FromPrimitive+Integer> ToCoordinate<I> for (I, I) {
 
 impl<I : SignedInt+FromPrimitive+Integer> ToCoordinate<I> for Direction {
     fn to_coordinate(&self) -> Coordinate<I> {
-        let (x, y, z) = match *self {
-            YZ => (0, 1, -1),
-            XZ => (1, 0, -1),
-            XY => (1, -1, 0),
-            ZY => (0, -1, 1),
-            ZX => (-1, 0, 1),
-            YX => (-1, 1, 0),
+        let (x, y) = match *self {
+            YZ => (0, 1),
+            XZ => (1, 0),
+            XY => (1, -1),
+            ZY => (0, -1),
+            ZX => (-1, 0),
+            YX => (-1, 1),
         };
 
         Coordinate {
             x: FromPrimitive::from_i8(x).unwrap(),
             y: FromPrimitive::from_i8(y).unwrap(),
-            z: FromPrimitive::from_i8(z).unwrap()
-        }.invariant()
+        }
     }
 }
 
@@ -516,8 +509,7 @@ impl<I : SignedInt+FromPrimitive+Integer, T: ToCoordinate<I>> Add<T> for Coordin
         Coordinate {
             x: self.x + c.x,
             y: self.y + c.y,
-            z: self.z + c.z,
-        }.invariant()
+        }
     }
 }
 
@@ -530,8 +522,7 @@ impl<I : SignedInt+FromPrimitive+Integer, T: ToCoordinate<I>> Sub<T> for Coordin
         Coordinate {
             x: self.x - c.x,
             y: self.y - c.y,
-            z: self.z - c.z,
-        }.invariant()
+        }
     }
 }
 
@@ -539,7 +530,7 @@ impl<I : SignedInt+FromPrimitive+Integer> Neg for Coordinate<I> {
     type Output = Coordinate<I>;
 
     fn neg(self) -> Coordinate<I> {
-        Coordinate { x: -self.x, y: -self.y, z: -self.z }.invariant()
+        Coordinate { x: -self.x, y: -self.y }
     }
 }
 

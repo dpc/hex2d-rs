@@ -16,3 +16,4 @@ path = "src/lib.rs"
 
 [dependencies]
 num = "*"
+rand = "*"
