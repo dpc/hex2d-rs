@@ -581,6 +581,14 @@ impl<T: ToDirection> Sub<T> for Direction {
     }
 }
 
+impl Neg for Direction {
+    type Output = Direction ;
+
+    fn neg(self) -> Direction {
+        Direction::from_int(self.to_direction().to_int() + 3)
+    }
+}
+
 impl Angle {
     /// Static array of all arrays
     pub fn all() -> &'static [Angle; 6] {
