@@ -5,13 +5,9 @@ use super::Coordinate;
 use super::Spin;
 
 use super::Direction::*;
-use super::Direction;
+use super::{Direction, Angle, IntegerSpacing, ToCoordinate, Position};
 use super::Angle::*;
-use super::Angle;
 use super::Spacing::*;
-use super::IntegerSpacing;
-
-use super::ToCoordinate;
 
 fn with_test_points<F : Fn(Coordinate) -> ()>(f : F) {
     let offs = [-2, -1, 0, 1, 2, 1000,-1000,1001,-1001];
@@ -45,6 +41,20 @@ fn direction_add_and_sub() {
         assert_eq!(d + Left + Left + Left, d + Back);
         assert_eq!(d + RightBack + RightBack + RightBack, d);
     }
+
+    with_test_points(|c : Coordinate| {
+        for &sd in Direction::all() {
+            let p = Position::new(c, sd);
+
+            assert_eq!(p + Forward, p);
+            assert_eq!(p + Right + Left, p);
+            assert_eq!(p + Right + Right, p + RightBack);
+            assert_eq!(p + Right + Right + Right, p + Back);
+            assert_eq!(p + Left + Left, p + LeftBack);
+            assert_eq!(p + Left + Left + Left, p + Back);
+            assert_eq!(p + RightBack + RightBack + RightBack, p);
+        }
+    });
 }
 
 

@@ -102,11 +102,15 @@ pub trait ToDirection {
 }
 
 
-/// Can be treated as an `Angle`
-pub trait ToAngle {
-    /// Convert to `Angle` part of this data
-    fn to_angle(&self) -> Angle;
+/// Position on 2d hexagonal grid (Coordinate + Direction)
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct Position<I : SignedInt = i32> {
+    /// `x` coordinate
+    pub coord : Coordinate<I>,
+    /// `y` coordinate
+    pub dir : Direction,
 }
+
 
 /// Direction on a hexagonal map
 ///
@@ -258,26 +262,26 @@ impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
         }
     }
 
-    /// Direction from self to `pos`
+    /// Direction from self to `coord`
     ///
     /// In case of diagonals (edge of two major directions), prefers direction that is clockwise
     /// from the diagonal.
     ///
     /// Returns:
     /// None if is center
-    pub fn direction_to_cw(&self, pos : Coordinate<I>) -> Option<Direction> {
-        (pos - *self).direction_from_center_cw()
+    pub fn direction_to_cw(&self, coor : Coordinate<I>) -> Option<Direction> {
+        (coor - *self).direction_from_center_cw()
     }
 
-    /// Direction from self to `pos`
+    /// Direction from self to `coor`
     ///
     /// In case of diagonals (edge of two major directions), prefers direction that is
     /// counter-clockwise from the diagonal.
     ///
     /// Returns:
     /// None if is center
-    pub fn direction_to_ccw(&self, pos : Coordinate<I>) -> Option<Direction> {
-        (pos - *self).direction_from_center_ccw()
+    pub fn direction_to_ccw(&self, coor: Coordinate<I>) -> Option<Direction> {
+        (coor - *self).direction_from_center_ccw()
     }
 
     /// Array with all the neighbors of a coordinate
@@ -483,24 +487,6 @@ impl<I : SignedInt+FromPrimitive+Integer> ToCoordinate<I> for (I, I) {
     }
 }
 
-impl<I : SignedInt+FromPrimitive+Integer> ToCoordinate<I> for Direction {
-    fn to_coordinate(&self) -> Coordinate<I> {
-        let (x, y) = match *self {
-            YZ => (0, 1),
-            XZ => (1, 0),
-            XY => (1, -1),
-            ZY => (0, -1),
-            ZX => (-1, 0),
-            YX => (-1, 1),
-        };
-
-        Coordinate {
-            x: FromPrimitive::from_i8(x).unwrap(),
-            y: FromPrimitive::from_i8(y).unwrap(),
-        }
-    }
-}
-
 impl<I : SignedInt+FromPrimitive+Integer, T: ToCoordinate<I>> Add<T> for Coordinate<I> {
     type Output = Coordinate<I>;
 
@@ -527,11 +513,55 @@ impl<I : SignedInt+FromPrimitive+Integer, T: ToCoordinate<I>> Sub<T> for Coordin
     }
 }
 
+
 impl<I : SignedInt+FromPrimitive+Integer> Neg for Coordinate<I> {
     type Output = Coordinate<I>;
 
     fn neg(self) -> Coordinate<I> {
         Coordinate { x: -self.x, y: -self.y }
+    }
+}
+
+impl<I: SignedInt> Position<I> {
+    /// Create a new Position
+    pub fn new(coord : Coordinate<I>, dir : Direction) -> Position<I> {
+        Position{ coord: coord, dir: dir }
+    }
+}
+
+impl<I : SignedInt> ToDirection for Position<I> {
+    fn to_direction(&self) -> Direction {
+        self.dir
+    }
+}
+
+impl<I : SignedInt> ToCoordinate<I> for Position<I> {
+    fn to_coordinate(&self) -> Coordinate<I> {
+        self.coord
+    }
+}
+
+impl<I : SignedInt+FromPrimitive+Integer> Add<Coordinate<I>> for Position<I> {
+    type Output = Position<I>;
+
+    fn add(self, c : Coordinate<I>) -> Position<I> {
+        let c = c.to_coordinate();
+
+        Position {
+            coord: self.coord + c,
+            dir: self.dir,
+        }
+    }
+}
+
+impl<I : SignedInt> Add<Angle> for Position<I> {
+    type Output = Position<I>;
+
+    fn add(self, a : Angle) -> Position<I> {
+        Position {
+            coord: self.coord,
+            dir: self.dir + a,
+        }
     }
 }
 
@@ -570,7 +600,6 @@ impl ToDirection for Direction {
     }
 }
 
-
 impl<T: ToDirection> Sub<T> for Direction {
     type Output = Angle;
 
@@ -578,6 +607,24 @@ impl<T: ToDirection> Sub<T> for Direction {
         let c = c.to_direction();
 
         Angle::from_int(self.to_int::<i8>() - c.to_int())
+    }
+}
+
+impl<I : SignedInt+FromPrimitive+Integer> ToCoordinate<I> for Direction {
+    fn to_coordinate(&self) -> Coordinate<I> {
+        let (x, y) = match *self {
+            YZ => (0, 1),
+            XZ => (1, 0),
+            XY => (1, -1),
+            ZY => (0, -1),
+            ZX => (-1, 0),
+            YX => (-1, 1),
+        };
+
+        Coordinate {
+            x: FromPrimitive::from_i8(x).unwrap(),
+            y: FromPrimitive::from_i8(y).unwrap(),
+        }
     }
 }
 
@@ -618,19 +665,11 @@ impl Angle {
     }
 }
 
-impl ToAngle for Angle {
-    fn to_angle(&self) -> Angle {
-        *self
-    }
-}
-
-impl<T: ToAngle> Add<T> for Direction {
+impl Add<Angle> for Direction {
     type Output = Direction;
 
-    fn add(self, c : T) -> Direction {
-        let c = c.to_angle();
-
-        Direction::from_int(self.to_int::<i32>() + c.to_int())
+    fn add(self, a : Angle) -> Direction {
+        Direction::from_int(self.to_int::<i32>() + a.to_int())
     }
 }
 
