@@ -60,7 +60,6 @@
 #![crate_type = "lib"]
 
 #![warn(missing_docs)]
-#![feature(hash)]
 #![feature(core)]
 
 extern crate num;
