@@ -65,9 +65,10 @@
 extern crate num;
 extern crate rand;
 
-use std::num::{SignedInt, FromPrimitive, ToPrimitive, Float};
+use std::num::{SignedInt, FromPrimitive, ToPrimitive, Float, Int};
 use std::ops::{Add, Neg, Sub};
 use std::cmp::{max, min};
+use std::iter::range_inclusive;
 use num::integer::{Integer};
 
 use Direction::*;
@@ -183,7 +184,7 @@ pub enum IntegerSpacing<I> {
     PointyTop(I, I),
 }
 
-impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
+impl<I : SignedInt+FromPrimitive+Integer+Int> Coordinate<I> {
     /// Create new Coord from `x` and `y`
     pub fn new(x : I, y : I) -> Coordinate<I> {
         Coordinate { x: x, y: y}
@@ -194,6 +195,67 @@ impl<I : SignedInt+FromPrimitive+Integer> Coordinate<I> {
         let x = self.x * s;
         let y = self.y * s;
         Coordinate{ x: x, y: y }
+    }
+
+    /// Round x, y float to nearest hex coordinates
+    pub fn from_round(x : f32, y : f32) -> Coordinate<I> {
+        let z = 0f32 - x - y;
+
+        let mut rx = x.round();
+        let mut ry = y.round();
+        let rz = z.round();
+
+        let x_diff = (rx - x).abs();
+        let y_diff = (ry - y).abs();
+        let z_diff = (rz - z).abs();
+
+        if x_diff > y_diff && x_diff > z_diff {
+            rx = -ry - rz;
+        } else if y_diff > z_diff {
+            ry = -rx - rz;
+        } else {
+            // not needed, kept for a reference
+            // rz = -rx - ry;
+        }
+
+        Coordinate {
+            x: FromPrimitive::from_f32(rx).unwrap(),
+            y: FromPrimitive::from_f32(ry).unwrap(),
+        }
+    }
+
+    /// Execute `f` for each coordinate in straight line from `self` to `dest`
+    pub fn for_each_in_line_to<F>(&self, dest : Coordinate<I>, mut f : F)
+        where F : FnMut(Coordinate<I>) {
+            if *self == dest {
+                f(*self);
+                return;
+            }
+
+            let n = self.distance(dest);
+
+            let ax = self.x.to_f32().unwrap();
+            let ay = self.y.to_f32().unwrap();
+            let bx = dest.x.to_f32().unwrap();
+            let by = dest.y.to_f32().unwrap();
+
+            for i in range_inclusive(FromPrimitive::from_i8(0).unwrap(), n) {
+                let d = i.to_f32().unwrap() / n.to_f32().unwrap();
+                let x = ax + (bx - ax) * d;
+                let y = ay + (by - ay) * d;
+                f(Coordinate::from_round(x, y));
+            }
+    }
+
+    /// Construct a straight line to a `dest`
+    pub fn line_to(&self, dest : Coordinate<I>) -> Vec<Coordinate<I>> {
+        let mut res = Vec::new();
+
+        self.for_each_in_line_to(dest, |c| {
+            res.push(c);
+        });
+
+        res
     }
 
     /// Z coordinate

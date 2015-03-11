@@ -324,3 +324,10 @@ fn simple_direction_sub() {
         }
     }
 }
+#[test]
+fn simple_line_to() {
+    with_test_points(|c : Coordinate| {
+        assert_eq!(c.line_to(c), vec!(c));
+    });
+}
+
