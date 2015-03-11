@@ -1,7 +1,7 @@
 [package]
 name = "hex2d"
-version = "0.0.9"
-authors = [ "Dawid Ciężarkiewicz <dawid@dpc.pw>" ]
+version = "0.0.10"
+authors = [ "Dawid Ciężarkiewicz <dpc@dpc.pw>" ]
 description = "Helper library for working with 2d hex-grid maps"
 documentation = "http://dpc.github.io/hex2d-rs/"
 repository = "https://github.com/dpc/hex2d-rs"
