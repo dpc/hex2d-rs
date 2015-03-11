@@ -553,6 +553,19 @@ impl<I : SignedInt+FromPrimitive+Integer> Add<Coordinate<I>> for Position<I> {
     }
 }
 
+impl<I : SignedInt+FromPrimitive+Integer> Sub<Coordinate<I>> for Position<I> {
+    type Output = Position<I>;
+
+    fn sub(self, c : Coordinate<I>) -> Position<I> {
+        let c = c.to_coordinate();
+
+        Position {
+            coord: self.coord - c,
+            dir: self.dir,
+        }
+    }
+}
+
 impl<I : SignedInt> Add<Angle> for Position<I> {
     type Output = Position<I>;
 
