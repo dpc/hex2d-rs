@@ -377,8 +377,8 @@ impl<I : SignedInt+FromPrimitive+Integer+Int> Coordinate<I> {
         where F : FnMut(Coordinate<I>) {
         let one : I = FromPrimitive::from_i8(1).unwrap();
 
-        for x in range(-r, r + one) {
-            for y in range(max(-r, -x-r), min(r, -x+r) + one) {
+        for x in -r..r + one {
+            for y in max(-r, -x-r)..min(r, -x+r) + one {
                 f(Coordinate{
                     x: self.x + x,
                     y: self.y + y,
@@ -430,9 +430,9 @@ impl<I : SignedInt+FromPrimitive+Integer+Int> Coordinate<I> {
             );
         let mut cur_dir = start_dir + start_angle;
 
-        for _ in range(0, 6) {
+        for _ in 0..6 {
             let cur_dir_coord = cur_dir.to_coordinate();
-            for _ in range(0, r) {
+            for _ in 0..r {
                 f(cur_coord);
                 cur_coord = cur_coord + cur_dir_coord;
             }

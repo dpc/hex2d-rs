@@ -119,7 +119,7 @@ fn coord_range() {
 #[test]
 fn range_distance() {
     with_test_points(|c : Coordinate| {
-        for r in range(0, 10) {
+        for r in 0..10 {
             for p in c.range(r).iter() {
                 assert!(p.distance(c) <= r);
             }
