@@ -61,15 +61,17 @@
 
 #![warn(missing_docs)]
 #![feature(core)]
+#![feature(zero_one)]
+#![feature(step_trait)]
 
 extern crate num;
 extern crate rand;
 
-use std::num::{SignedInt, FromPrimitive, ToPrimitive, Float, Int};
-use std::ops::{Add, Neg, Sub};
+use std::num::{Float, One, Zero};
+use std::ops::{Add, Sub, Neg};
 use std::cmp::{max, min};
 use std::iter::range_inclusive;
-use num::integer::{Integer};
+use std::iter::{Step};
 
 use Direction::*;
 use Angle::*;
@@ -77,12 +79,20 @@ use Spin::*;
 use Spacing::*;
 
 
+/// Integer trait required by this library
+pub trait Integer : num::Signed+num::Integer+num::ToPrimitive+num::FromPrimitive+Step+One+Zero+Copy { }
+
+impl<I> Integer for I
+where
+I : num::Signed+num::Integer+num::ToPrimitive+num::FromPrimitive+Step+One+Zero+Copy
+{ }
+
 #[cfg(test)]
 mod test;
 
 /// Coordinate on 2d hexagonal grid
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub struct Coordinate<I : SignedInt = i32> {
+pub struct Coordinate<I : Integer = i32> {
     /// `x` coordinate
     pub x : I,
     /// `y` coordinate
@@ -90,7 +100,7 @@ pub struct Coordinate<I : SignedInt = i32> {
 }
 
 /// Can be treated as a `Coordinate`
-pub trait ToCoordinate<I : SignedInt = i32> {
+pub trait ToCoordinate<I: Integer = i32> {
     /// Convert to `Coordinate` part of this data
     fn to_coordinate(&self) -> Coordinate<I>;
 }
@@ -104,7 +114,7 @@ pub trait ToDirection {
 
 /// Position on 2d hexagonal grid (Coordinate + Direction)
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub struct Position<I : SignedInt = i32> {
+pub struct Position<I : Integer = i32> {
     /// `x` coordinate
     pub coord : Coordinate<I>,
     /// `y` coordinate
@@ -184,7 +194,7 @@ pub enum IntegerSpacing<I> {
     PointyTop(I, I),
 }
 
-impl<I : SignedInt+FromPrimitive+Integer+Int> Coordinate<I> {
+impl<I : Integer> Coordinate<I> {
     /// Create new Coord from `x` and `y`
     pub fn new(x : I, y : I) -> Coordinate<I> {
         Coordinate { x: x, y: y}
@@ -198,12 +208,12 @@ impl<I : SignedInt+FromPrimitive+Integer+Int> Coordinate<I> {
     }
 
     /// Round x, y float to nearest hex coordinates
-    pub fn from_round(x : f32, y : f32) -> Coordinate<I> {
+    pub fn from_round(x : f32, y : f32) -> Option<Coordinate<I>> {
         let z = 0f32 - x - y;
 
         let mut rx = x.round();
         let mut ry = y.round();
-        let rz = z.round();
+        let mut rz = z.round();
 
         let x_diff = (rx - x).abs();
         let y_diff = (ry - y).abs();
@@ -215,18 +225,29 @@ impl<I : SignedInt+FromPrimitive+Integer+Int> Coordinate<I> {
             ry = -rx - rz;
         } else {
             // not needed, kept for a reference
-            // rz = -rx - ry;
+            rz = -rx - ry;
         }
 
-        Coordinate {
-            x: FromPrimitive::from_f32(rx).unwrap(),
-            y: FromPrimitive::from_f32(ry).unwrap(),
+        let x_diff = (rx - x).abs();
+        let y_diff = (ry - y).abs();
+        let z_diff = (rz - z).abs();
+
+        if x_diff + y_diff + z_diff > 0.99 {
+            return None;
         }
+
+        Some(Coordinate {
+            x: num::FromPrimitive::from_f32(rx).unwrap(),
+            y: num::FromPrimitive::from_f32(ry).unwrap(),
+        })
     }
 
     /// Execute `f` for each coordinate in straight line from `self` to `dest`
     pub fn for_each_in_line_to<F>(&self, dest : Coordinate<I>, mut f : F)
-        where F : FnMut(Coordinate<I>) {
+        where
+        F : FnMut(Coordinate<I>),
+        for <'a> &'a I: Add<&'a I, Output = I>
+        {
             if *self == dest {
                 f(*self);
                 return;
@@ -239,16 +260,22 @@ impl<I : SignedInt+FromPrimitive+Integer+Int> Coordinate<I> {
             let bx = dest.x.to_f32().unwrap();
             let by = dest.y.to_f32().unwrap();
 
-            for i in range_inclusive(FromPrimitive::from_i8(0).unwrap(), n) {
+            for i in range_inclusive(Zero::zero(), n) {
                 let d = i.to_f32().unwrap() / n.to_f32().unwrap();
                 let x = ax + (bx - ax) * d;
                 let y = ay + (by - ay) * d;
-                f(Coordinate::from_round(x, y));
+                let c = Coordinate::from_round(x, y);
+                if let Some(c) = c {
+                    f(c);
+                }
             }
     }
 
     /// Construct a straight line to a `dest`
-    pub fn line_to(&self, dest : Coordinate<I>) -> Vec<Coordinate<I>> {
+    pub fn line_to(&self, dest : Coordinate<I>) -> Vec<Coordinate<I>>
+    where
+        for <'a> &'a I: Add<&'a I, Output = I>
+    {
         let mut res = Vec::new();
 
         self.for_each_in_line_to(dest, |c| {
@@ -259,7 +286,8 @@ impl<I : SignedInt+FromPrimitive+Integer+Int> Coordinate<I> {
     }
 
     /// Z coordinate
-    pub fn z(&self) -> I {
+    pub fn z(&self) -> I
+    {
         -self.x - self.y
     }
 
@@ -275,7 +303,7 @@ impl<I : SignedInt+FromPrimitive+Integer+Int> Coordinate<I> {
         let x = self.x;
         let y = self.y;
         let z = self.z();
-        let zero : I = FromPrimitive::from_i8(0).unwrap();
+        let zero : I = num::FromPrimitive::from_i8(0).unwrap();
 
         let xy = if z < zero { x >= y } else { x > y };
         let yz = if x < zero { y >= z } else { y > z };
@@ -305,7 +333,7 @@ impl<I : SignedInt+FromPrimitive+Integer+Int> Coordinate<I> {
         let x = self.x;
         let y = self.y;
         let z = self.z();
-        let zero : I = FromPrimitive::from_i8(0).unwrap();
+        let zero : I = num::FromPrimitive::from_i8(0).unwrap();
 
         let xy = if z > zero { x >= y } else { x > y };
         let yz = if x > zero { y >= z } else { y > z };
@@ -360,11 +388,14 @@ impl<I : SignedInt+FromPrimitive+Integer+Int> Coordinate<I> {
     /// Distance between two Coordinates
     pub fn distance(&self, c : Coordinate<I>) -> I {
         ((self.x - c.x).abs() + (self.y - c.y).abs() + (self.z() - c.z()).abs())
-            / FromPrimitive::from_i8(2).unwrap()
+            / num::FromPrimitive::from_i8(2).unwrap()
     }
 
     /// All coordinates in radius `r`
-    pub fn range(&self, r : I) -> Vec<Coordinate<I>> {
+    pub fn range(&self, r : I) -> Vec<Coordinate<I>>
+    where
+        for <'a> &'a I: Add<&'a I, Output = I>
+    {
 
         let mut res = vec!();
         self.for_each_in_range(r, |c| res.push(c));
@@ -374,10 +405,13 @@ impl<I : SignedInt+FromPrimitive+Integer+Int> Coordinate<I> {
 
     /// Execute `f` for all coordinates in radius `r`
     pub fn for_each_in_range<F>(&self, r : I, mut f : F)
-        where F : FnMut(Coordinate<I>) {
-        let one : I = FromPrimitive::from_i8(1).unwrap();
+        where
+        F : FnMut(Coordinate<I>),
+        for <'a> &'a I: Add<&'a I, Output = I>
+        {
+            let one : I = One::one();
 
-        for x in -r..r + one {
+        for x in -r..(r + one) {
             for y in max(-r, -x-r)..min(r, -x+r) + one {
                 f(Coordinate{
                     x: self.x + x,
@@ -426,7 +460,7 @@ impl<I : SignedInt+FromPrimitive+Integer+Int> Coordinate<I> {
         };
 
         let mut cur_coord = *self + start_dir.to_coordinate().scale(
-            FromPrimitive::from_i32(r).unwrap()
+            num::FromPrimitive::from_i32(r).unwrap()
             );
         let mut cur_dir = start_dir + start_angle;
 
@@ -466,7 +500,7 @@ impl<I : SignedInt+FromPrimitive+Integer+Int> Coordinate<I> {
     pub fn to_pixel_integer(&self, spacing : IntegerSpacing<I>) -> (I, I) {
         let q = self.x;
         let r = self.z();
-        let two = FromPrimitive::from_i8(2).unwrap();
+        let two = num::FromPrimitive::from_i8(2).unwrap();
 
         match spacing {
             IntegerSpacing::FlatTop(w, h) => (
@@ -487,7 +521,7 @@ impl<I : SignedInt+FromPrimitive+Integer+Int> Coordinate<I> {
     pub fn from_pixel_integer(spacing : IntegerSpacing<I>, v : (I, I)) -> (Coordinate<I>, (I, I)) {
         let (asc_x, asc_y) = v;
 
-        let two : I = FromPrimitive::from_i8(2).unwrap();
+        let two : I = num::FromPrimitive::from_i8(2).unwrap();
 
         let ((q, qo),(r, ro)) = match spacing {
             IntegerSpacing::FlatTop(w, h) => (
@@ -535,20 +569,20 @@ impl<I : SignedInt+FromPrimitive+Integer+Int> Coordinate<I> {
     }
 }
 
-impl<I : SignedInt> ToCoordinate<I> for Coordinate<I> {
+impl<I : Integer> ToCoordinate<I> for Coordinate<I> {
     fn to_coordinate(&self) -> Coordinate<I> {
         *self
     }
 }
 
-impl<I : SignedInt+FromPrimitive+Integer> ToCoordinate<I> for (I, I) {
+impl<I : Integer> ToCoordinate<I> for (I, I) {
     fn to_coordinate(&self) -> Coordinate<I> {
         let (x, y) = *self;
         Coordinate::new(x, y)
     }
 }
 
-impl<I : SignedInt+FromPrimitive+Integer, T: ToCoordinate<I>> Add<T> for Coordinate<I> {
+impl<I : Integer, T: ToCoordinate<I>> Add<T> for Coordinate<I> {
     type Output = Coordinate<I>;
 
     fn add(self, c : T) -> Coordinate<I> {
@@ -561,7 +595,7 @@ impl<I : SignedInt+FromPrimitive+Integer, T: ToCoordinate<I>> Add<T> for Coordin
     }
 }
 
-impl<I : SignedInt+FromPrimitive+Integer, T: ToCoordinate<I>> Sub<T> for Coordinate<I> {
+impl<I : Integer, T: ToCoordinate<I>> Sub<T> for Coordinate<I> {
     type Output = Coordinate<I>;
 
     fn sub(self, c : T) -> Coordinate<I> {
@@ -575,7 +609,8 @@ impl<I : SignedInt+FromPrimitive+Integer, T: ToCoordinate<I>> Sub<T> for Coordin
 }
 
 
-impl<I : SignedInt+FromPrimitive+Integer> Neg for Coordinate<I> {
+impl<I : Integer> Neg for Coordinate<I>
+{
     type Output = Coordinate<I>;
 
     fn neg(self) -> Coordinate<I> {
@@ -583,26 +618,29 @@ impl<I : SignedInt+FromPrimitive+Integer> Neg for Coordinate<I> {
     }
 }
 
-impl<I: SignedInt> Position<I> {
+impl<I : Integer> Position<I>
+{
     /// Create a new Position
     pub fn new(coord : Coordinate<I>, dir : Direction) -> Position<I> {
         Position{ coord: coord, dir: dir }
     }
 }
 
-impl<I : SignedInt> ToDirection for Position<I> {
+impl<I : Integer> ToDirection for Position<I>
+{
     fn to_direction(&self) -> Direction {
         self.dir
     }
 }
 
-impl<I : SignedInt> ToCoordinate<I> for Position<I> {
+impl<I : Integer> ToCoordinate<I> for Position<I>
+{
     fn to_coordinate(&self) -> Coordinate<I> {
         self.coord
     }
 }
 
-impl<I : SignedInt+FromPrimitive+Integer> Add<Coordinate<I>> for Position<I> {
+impl<I : Integer> Add<Coordinate<I>> for Position<I> {
     type Output = Position<I>;
 
     fn add(self, c : Coordinate<I>) -> Position<I> {
@@ -615,7 +653,8 @@ impl<I : SignedInt+FromPrimitive+Integer> Add<Coordinate<I>> for Position<I> {
     }
 }
 
-impl<I : SignedInt+FromPrimitive+Integer> Sub<Coordinate<I>> for Position<I> {
+impl<I : Integer> Sub<Coordinate<I>> for Position<I>
+{
     type Output = Position<I>;
 
     fn sub(self, c : Coordinate<I>) -> Position<I> {
@@ -628,7 +667,8 @@ impl<I : SignedInt+FromPrimitive+Integer> Sub<Coordinate<I>> for Position<I> {
     }
 }
 
-impl<I : SignedInt> Add<Angle> for Position<I> {
+impl<I : Integer> Add<Angle> for Position<I> 
+{
     type Output = Position<I>;
 
     fn add(self, a : Angle) -> Position<I> {
@@ -648,8 +688,8 @@ impl Direction {
     /// Create Direction from integer in [0, 6) range
     ///
     /// This should probably be internal
-    pub fn from_int<I : Integer+FromPrimitive+ToPrimitive>(i : I) -> Direction {
-        match i.mod_floor(&FromPrimitive::from_i8(6).unwrap()).to_u8().unwrap() {
+    pub fn from_int<I : Integer>(i : I) -> Direction {
+        match i.mod_floor(&num::FromPrimitive::from_i8(6).unwrap()).to_u8().unwrap() {
             0 => YZ,
             1 => XZ,
             2 => XY,
@@ -663,8 +703,8 @@ impl Direction {
     /// Convert to integer in [0, 6) range
     ///
     /// This should probably be internal
-    pub fn to_int<I : Integer+FromPrimitive>(&self) -> I {
-       FromPrimitive::from_u8(*self as u8).unwrap()
+    pub fn to_int<I : Integer>(&self) -> I {
+       num::FromPrimitive::from_u8(*self as u8).unwrap()
     }
 }
 
@@ -680,11 +720,11 @@ impl<T: ToDirection> Sub<T> for Direction {
     fn sub(self, c : T) -> Angle {
         let c = c.to_direction();
 
-        Angle::from_int(self.to_int::<i8>() - c.to_int())
+        Angle::from_int::<i8>(self.to_int::<i8>() - c.to_int::<i8>())
     }
 }
 
-impl<I : SignedInt+FromPrimitive+Integer> ToCoordinate<I> for Direction {
+impl<I : Integer> ToCoordinate<I> for Direction {
     fn to_coordinate(&self) -> Coordinate<I> {
         let (x, y) = match *self {
             YZ => (0, 1),
@@ -696,8 +736,8 @@ impl<I : SignedInt+FromPrimitive+Integer> ToCoordinate<I> for Direction {
         };
 
         Coordinate {
-            x: FromPrimitive::from_i8(x).unwrap(),
-            y: FromPrimitive::from_i8(y).unwrap(),
+            x: num::FromPrimitive::from_i8(x).unwrap(),
+            y: num::FromPrimitive::from_i8(y).unwrap(),
         }
     }
 }
@@ -706,7 +746,7 @@ impl Neg for Direction {
     type Output = Direction ;
 
     fn neg(self) -> Direction {
-        Direction::from_int(self.to_direction().to_int() + 3)
+        Direction::from_int::<i8>(self.to_direction().to_int::<i8>() + 3)
     }
 }
 
@@ -719,8 +759,8 @@ impl Angle {
     /// Create Angle from integer in [0, 6) range
     ///
     /// This should probably be internal
-    pub fn from_int<I : Integer+FromPrimitive+ToPrimitive>(i : I) -> Angle {
-        match i.mod_floor(&FromPrimitive::from_i8(6).unwrap()).to_u8().unwrap() {
+    pub fn from_int<I : Integer>(i : I) -> Angle {
+        match i.mod_floor(&num::FromPrimitive::from_i8(6).unwrap()).to_u8().unwrap() {
             0 => Forward,
             1 => Right,
             2 => RightBack,
@@ -734,8 +774,8 @@ impl Angle {
     /// Convert to integer in [0, 6) range
     ///
     /// This should probably be internal
-    pub fn to_int<I : Integer+FromPrimitive>(&self) -> I {
-       FromPrimitive::from_u8(*self as u8).unwrap()
+    pub fn to_int<I : Integer>(&self) -> I {
+       num::FromPrimitive::from_u8(*self as u8).unwrap()
     }
 }
 
@@ -743,7 +783,7 @@ impl Add<Angle> for Direction {
     type Output = Direction;
 
     fn add(self, a : Angle) -> Direction {
-        Direction::from_int(self.to_int::<i32>() + a.to_int())
+        Direction::from_int(self.to_int::<i8>() + a.to_int::<i8>())
     }
 }
 

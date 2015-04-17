@@ -1,16 +1,13 @@
 // Copyright 2014 Dawid Ciężarkiewicz
 // See LICENSE file for more information
 
-use super::Coordinate;
-use super::Spin;
-
+use super::*;
 use super::Direction::*;
-use super::{Direction, Angle, IntegerSpacing, ToCoordinate, Position};
 use super::Angle::*;
 use super::Spacing::*;
 
 fn with_test_points<F : Fn(Coordinate) -> ()>(f : F) {
-    let offs = [-2, -1, 0, 1, 2, 1000,-1000,1001,-1001];
+    let offs = [-2i32, -1, 0, 1, 2, 1000, -1000, 1001, -1001];
     for &x in offs.iter() {
         for &y in offs.iter() {
             let p = Coordinate::new(x, y);

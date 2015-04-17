@@ -4,7 +4,7 @@ default: $(DEFAULT_TARGET)
 
 .PHONY: run test build doc clean
 run test build doc clean:
-	cargo $@
+	@cargo $@
 
 simple:
 	cargo run --example simple
