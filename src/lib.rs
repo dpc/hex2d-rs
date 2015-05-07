@@ -67,7 +67,8 @@
 extern crate num;
 extern crate rand;
 
-use std::num::{Float, One, Zero};
+use num::{Float};
+use std::num::{One, Zero};
 use std::ops::{Add, Sub, Neg};
 use std::cmp::{max, min};
 use std::iter::range_inclusive;
