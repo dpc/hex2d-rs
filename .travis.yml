@@ -1,4 +1,6 @@
 language: rust
+rust:
+  - nightly
 env:
   - DOCS_DEFAULT_MODULE=hex2d
 script:
