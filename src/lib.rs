@@ -74,8 +74,8 @@ use std::cmp::{max, min};
 use std::iter::range_inclusive;
 use std::iter::{Step};
 
-use Direction::*;
-use Angle::*;
+pub use Direction::*;
+pub use Angle::*;
 use Spin::*;
 use Spacing::*;
 
@@ -299,6 +299,21 @@ impl<I : Integer> Coordinate<I> {
     ///
     /// Returns:
     /// None if is center
+    ///
+    /// ```
+    /// use hex2d::{Direction, Coordinate};
+    /// use hex2d::{Left, Right};
+    ///
+    /// let center = Coordinate::new(0, 0);
+    ///
+    /// assert_eq!(center.direction_from_center_cw(), None);
+    ///
+    /// for &d in Direction::all() {
+    ///     assert_eq!((center + d).direction_from_center_cw(), Some(d));
+    ///     assert_eq!((center + d + (d + Left)).direction_from_center_cw(), Some(d));
+    ///     assert_eq!((center + d + (d + Right)).direction_from_center_cw(), Some(d + Right));
+    /// }
+    /// ```
     pub fn direction_from_center_cw(&self) -> Option<Direction> {
 
         let x = self.x;
@@ -329,6 +344,21 @@ impl<I : Integer> Coordinate<I> {
     ///
     /// Returns:
     /// None if is center
+    ///
+    /// ```
+    /// use hex2d::{Direction, Coordinate};
+    /// use hex2d::{Left, Right};
+    ///
+    /// let center = Coordinate::new(0, 0);
+    ///
+    /// assert_eq!(center.direction_from_center_ccw(), None);
+    ///
+    /// for &d in Direction::all() {
+    ///     assert_eq!((center + d).direction_from_center_ccw(), Some(d));
+    ///     assert_eq!((center + d + (d + Left)).direction_from_center_ccw(), Some(d + Left));
+    ///     assert_eq!((center + d + (d + Right)).direction_from_center_ccw(), Some(d));
+    /// }
+    /// ```
     pub fn direction_from_center_ccw(&self) -> Option<Direction> {
 
         let x = self.x;
@@ -436,6 +466,19 @@ impl<I : Integer> Coordinate<I> {
     ///          0   .   4
     ///            1   3
     ///              2
+    /// ```
+    ///
+    /// ```
+    ///
+    /// use hex2d::{Coordinate, Spin, XY};
+    ///
+    /// let center = Coordinate::new(5, -1);
+    ///
+    /// for &c in &center.neighbors() {
+    ///     for &ring_c in &c.ring(5, Spin::CCW(XY)) {
+    ///         assert_eq!(c.distance(ring_c), 5);
+    ///     }
+    /// }
     /// ```
     pub fn ring(&self, r : i32, s : Spin) -> Vec<Coordinate<I>> {
         let mut res = vec!();
@@ -682,8 +725,37 @@ impl<I : Integer> Add<Angle> for Position<I>
 
 impl Direction {
     /// Static array of all directions
+    ///
+    /// ```
+    /// use hex2d::Direction;
+    ///
+    /// assert_eq!(Direction::all().len(), 6);
+    /// ```
     pub fn all() -> &'static [Direction; 6] {
         &ALL_DIRECTIONS
+    }
+
+    /// Return a vector of an arc including Directions `steps` away from the original Direction both
+    /// sides from left to right.
+    ///
+    /// ```
+    /// use hex2d::{Direction};
+    /// use hex2d::Angle::*;
+    ///
+    /// for &d in Direction::all() {
+    ///     assert_eq!(d.arc(0), vec!(d));
+    ///     assert_eq!(d.arc(1), vec!(d + Left, d, d + Right));
+    ///     assert_eq!(d.arc(2), vec!(d + LeftBack, d + Left, d, d + Right, d + RightBack));
+    ///     assert_eq!(d.arc(3), vec!(d + LeftBack, d + Left, d, d + Right, d + RightBack, d + Back));
+    /// }
+    /// ```
+    pub fn arc(&self, steps : u8) -> Vec<Direction> {
+        match steps {
+            0 => vec!(*self),
+            1 => vec!(*self + Left, *self, *self + Right),
+            2 => vec!(*self + LeftBack, *self + Left, *self, *self + Right, *self + RightBack),
+            _ => vec!(*self + LeftBack, *self + Left, *self, *self + Right, *self + RightBack, *self + Back),
+        }
     }
 
     /// Create Direction from integer in [0, 6) range
@@ -752,7 +824,13 @@ impl Neg for Direction {
 }
 
 impl Angle {
-    /// Static array of all arrays
+    /// Static array of all angles
+    ///
+    /// ```
+    /// use hex2d::Angle;
+    ///
+    /// assert_eq!(Angle::all().len(), 6);
+    /// ```
     pub fn all() -> &'static [Angle; 6] {
         &ALL_ANGLES
     }

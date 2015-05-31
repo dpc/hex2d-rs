@@ -2,8 +2,6 @@
 // See LICENSE file for more information
 
 use super::*;
-use super::Direction::*;
-use super::Angle::*;
 use super::Spacing::*;
 
 fn with_test_points<F : Fn(Coordinate) -> ()>(f : F) {
