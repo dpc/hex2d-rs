@@ -92,7 +92,7 @@ I : num::Signed+num::Integer+num::ToPrimitive+num::FromPrimitive+Step+One+Zero+C
 mod test;
 
 /// Coordinate on 2d hexagonal grid
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
 pub struct Coordinate<I : Integer = i32> {
     /// `x` coordinate
     pub x : I,
@@ -114,7 +114,7 @@ pub trait ToDirection {
 
 
 /// Position on 2d hexagonal grid (Coordinate + Direction)
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
 pub struct Position<I : Integer = i32> {
     /// `x` coordinate
     pub coord : Coordinate<I>,
@@ -126,7 +126,7 @@ pub struct Position<I : Integer = i32> {
 /// Direction on a hexagonal map
 ///
 /// See `Coordinate` for graph with directions.
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
 pub enum Direction {
     /// +Y -Z
     YZ = 0,
@@ -147,7 +147,7 @@ static ALL_DIRECTIONS : [Direction; 6] = [ YZ, XZ, XY, ZY, ZX, YX ];
 static ALL_ANGLES : [Angle; 6] = [ Forward, Right, RightBack, Back, LeftBack, Left];
 
 /// Angle, relative to a Direction
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
 pub enum Angle {
     /// 0deg clockwise
     Forward = 0,
@@ -164,7 +164,7 @@ pub enum Angle {
 }
 
 /// Spinning directions
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
 pub enum Spin {
     /// Clockwise
     CW(Direction),
@@ -173,7 +173,7 @@ pub enum Spin {
 }
 
 /// Floating point tile size for pixel conversion functions
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug, PartialOrd)]
 pub enum Spacing {
     /// Hex-grid with an edge on top
     FlatTop(f32),
@@ -187,7 +187,7 @@ pub enum Spacing {
 ///
 /// * FlatTop(3, 2)
 /// * PointyTop(2, 1)
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, Ord, PartialOrd)]
 pub enum IntegerSpacing<I> {
     /// Hex-grid with an edge on top
     FlatTop(I, I),
