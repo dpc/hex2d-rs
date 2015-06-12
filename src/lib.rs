@@ -209,7 +209,36 @@ impl<I : Integer> Coordinate<I> {
     }
 
     /// Round x, y float to nearest hex coordinates
-    pub fn from_round(x : f32, y : f32) -> Option<Coordinate<I>> {
+    pub fn from_round(x : f32, y : f32) -> Coordinate<I> {
+        let z = 0f32 - x - y;
+
+        let mut rx = x.round();
+        let mut ry = y.round();
+        let rz = z.round();
+
+        let x_diff = (rx - x).abs();
+        let y_diff = (ry - y).abs();
+        let z_diff = (rz - z).abs();
+
+        if x_diff > y_diff && x_diff > z_diff {
+            rx = -ry - rz;
+        } else if y_diff > z_diff {
+            ry = -rx - rz;
+        } else {
+            // not needed, kept for a reference
+            // rz = -rx - ry;
+        }
+
+        Coordinate {
+            x: num::FromPrimitive::from_f32(rx).unwrap(),
+            y: num::FromPrimitive::from_f32(ry).unwrap(),
+        }
+    }
+
+    /// Round x, y float to nearest hex coordinates
+    ///
+    /// Return None, if exactly on the border of two hex coordinates
+    pub fn from_round_lossy(x : f32, y : f32) -> Option<Coordinate<I>> {
         let z = 0f32 - x - y;
 
         let mut rx = x.round();
@@ -225,7 +254,6 @@ impl<I : Integer> Coordinate<I> {
         } else if y_diff > z_diff {
             ry = -rx - rz;
         } else {
-            // not needed, kept for a reference
             rz = -rx - ry;
         }
 
@@ -266,11 +294,41 @@ impl<I : Integer> Coordinate<I> {
                 let x = ax + (bx - ax) * d;
                 let y = ay + (by - ay) * d;
                 let c = Coordinate::from_round(x, y);
+                f(c);
+            }
+    }
+
+    /// Execute `f` for each coordinate in straight line from `self` to `dest`
+    ///
+    /// Skip points on the border of two tiles
+    pub fn for_each_in_line_to_lossy<F>(&self, dest : Coordinate<I>, mut f : F)
+        where
+        F : FnMut(Coordinate<I>),
+        for <'a> &'a I: Add<&'a I, Output = I>
+        {
+            if *self == dest {
+                f(*self);
+                return;
+            }
+
+            let n = self.distance(dest);
+
+            let ax = self.x.to_f32().unwrap();
+            let ay = self.y.to_f32().unwrap();
+            let bx = dest.x.to_f32().unwrap();
+            let by = dest.y.to_f32().unwrap();
+
+            for i in range_inclusive(Zero::zero(), n) {
+                let d = i.to_f32().unwrap() / n.to_f32().unwrap();
+                let x = ax + (bx - ax) * d;
+                let y = ay + (by - ay) * d;
+                let c = Coordinate::from_round_lossy(x, y);
                 if let Some(c) = c {
                     f(c);
                 }
             }
     }
+
 
     /// Construct a straight line to a `dest`
     pub fn line_to(&self, dest : Coordinate<I>) -> Vec<Coordinate<I>>
@@ -285,6 +343,24 @@ impl<I : Integer> Coordinate<I> {
 
         res
     }
+
+
+    /// Construct a straight line to a `dest`
+    ///
+    /// Skip points on the border of two tiles
+    pub fn line_to_lossy(&self, dest : Coordinate<I>) -> Vec<Coordinate<I>>
+    where
+        for <'a> &'a I: Add<&'a I, Output = I>
+    {
+        let mut res = Vec::new();
+
+        self.for_each_in_line_to_lossy(dest, |c| {
+            res.push(c);
+        });
+
+        res
+    }
+
 
     /// Z coordinate
     pub fn z(&self) -> I
