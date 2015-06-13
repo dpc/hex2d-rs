@@ -329,6 +329,37 @@ impl<I : Integer> Coordinate<I> {
             }
     }
 
+    /// Execute `f` for pairs of coordinates in straight line from `self` to `dest`
+    ///
+    /// On edge condition the pair contains different members, otherwise it's the same.
+    pub fn for_each_in_line_to_with_edge_detection<F>(&self, dest : Coordinate<I>, mut f : F)
+        where
+        F : FnMut((Coordinate<I>, Coordinate<I>)),
+        for <'a> &'a I: Add<&'a I, Output = I>
+        {
+            if *self == dest {
+                f((*self, *self));
+                return;
+            }
+
+            let n = self.distance(dest);
+
+            let ax = self.x.to_f32().unwrap();
+            let ay = self.y.to_f32().unwrap();
+            let bx = dest.x.to_f32().unwrap();
+            let by = dest.y.to_f32().unwrap();
+
+            for i in range_inclusive(Zero::zero(), n) {
+                let d = i.to_f32().unwrap() / n.to_f32().unwrap();
+                let x = ax + (bx - ax) * d;
+                let y = ay + (by - ay) * d;
+                let c1 = Coordinate::from_round(x + 0.000001, y + 0.000001);
+                let c2 = Coordinate::from_round(x - 0.000001, y - 0.000001);
+                f((c1, c2));
+            }
+    }
+
+
 
     /// Construct a straight line to a `dest`
     pub fn line_to(&self, dest : Coordinate<I>) -> Vec<Coordinate<I>>
@@ -361,6 +392,21 @@ impl<I : Integer> Coordinate<I> {
         res
     }
 
+
+
+    /// Construct a straight line to a `dest`
+    pub fn line_to_with_edge_detection(&self, dest : Coordinate<I>) -> Vec<(Coordinate<I>, Coordinate<I>)>
+    where
+        for <'a> &'a I: Add<&'a I, Output = I>
+    {
+        let mut res = Vec::new();
+
+        self.for_each_in_line_to_with_edge_detection(dest, |c| {
+            res.push(c);
+        });
+
+        res
+    }
 
     /// Z coordinate
     pub fn z(&self) -> I
