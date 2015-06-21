@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Coordinate` struct in crate `hex2d`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Coordinate">
+
+    <title>hex2d::Coordinate - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'><a href='index.html'>hex2d</a></p><script>window.sidebarCurrent = {name: 'Coordinate', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>hex2d</a>::<wbr><a class='struct' href=''>Coordinate</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-47' class='srclink' href='../src/hex2d/lib.rs.html#101-106' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Coordinate&lt;I: <a class='trait' href='../hex2d/trait.Integer.html' title='hex2d::Integer'>Integer</a> = <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>&gt; {
+    pub x: I,
+    pub y: I,
+}</pre><div class='docblock'><p>Coordinate on 2d hexagonal grid</p>
+</div><h2 class='fields'>Fields</h2>
+<table><tr class='stab '>
+                                  <td id='structfield.x'><code>x</code></td><td><div class='docblock'><p><code>x</code> coordinate</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.y'><code>y</code></td><td><div class='docblock'><p><code>y</code> coordinate</p>
+</div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl&lt;I: <a class='trait' href='../hex2d/trait.Integer.html' title='hex2d::Integer'>Integer</a>&gt; <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;</code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>(x: I, y: I) -&gt; <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;</code></h4>
+<div class='docblock'><p>Create new Coord from <code>x</code> and <code>y</code></p>
+</div><h4 id='method.from_round' class='method'><code>fn <a href='#method.from_round' class='fnname'>from_round</a>(x: <a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>, y: <a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>) -&gt; <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;</code></h4>
+<div class='docblock'><p>Old name for <code>nearest</code></p>
+</div><h4 id='method.nearest' class='method'><code>fn <a href='#method.nearest' class='fnname'>nearest</a>(x: <a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>, y: <a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>) -&gt; <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;</code></h4>
+<div class='docblock'><p>Round x, y float to nearest hex coordinates</p>
+</div><h4 id='method.from_round_lossy' class='method'><code>fn <a href='#method.from_round_lossy' class='fnname'>from_round_lossy</a>(x: <a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>, y: <a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;&gt;</code></h4>
+<div class='docblock'><p>Old name for <code>nearest_lossy</code></p>
+</div><h4 id='method.nearest_lossy' class='method'><code>fn <a href='#method.nearest_lossy' class='fnname'>nearest_lossy</a>(x: <a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>, y: <a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;&gt;</code></h4>
+<div class='docblock'><p>Round x, y float to nearest hex coordinates</p>
+
+<p>Return None, if exactly on the border of two hex coordinates</p>
+</div><h4 id='method.from_pixel_integer' class='method'><code>fn <a href='#method.from_pixel_integer' class='fnname'>from_pixel_integer</a>(spacing: <a class='enum' href='../hex2d/enum.IntegerSpacing.html' title='hex2d::IntegerSpacing'>IntegerSpacing</a>&lt;I&gt;, v: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(I, I)</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;, <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(I, I)</a>)</a></code></h4>
+<div class='docblock'><p>Old name for <code>nearest_with_offset</code></p>
+</div><h4 id='method.nearest_with_offset' class='method'><code>fn <a href='#method.nearest_with_offset' class='fnname'>nearest_with_offset</a>(spacing: <a class='enum' href='../hex2d/enum.IntegerSpacing.html' title='hex2d::IntegerSpacing'>IntegerSpacing</a>&lt;I&gt;, v: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(I, I)</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;, <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(I, I)</a>)</a></code></h4>
+<div class='docblock'><p>Convert integer pixel coordinates <code>v</code> using <code>spacing</code> to nearest coordinate that has both
+integer pixel coordinates lower or equal to <code>v</code>. Also return offset (in integer pixels)
+from that coordinate.</p>
+
+<p>Useful for ASCII visualization.</p>
+</div><h4 id='method.to_pixel_float' class='method'><code>fn <a href='#method.to_pixel_float' class='fnname'>to_pixel_float</a>(&amp;self, spacing: <a class='enum' href='../hex2d/enum.Spacing.html' title='hex2d::Spacing'>Spacing</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>)</a></code></h4>
+<div class='docblock'><p>Old name for <code>to_pixel</code></p>
+</div><h4 id='method.to_pixel' class='method'><code>fn <a href='#method.to_pixel' class='fnname'>to_pixel</a>(&amp;self, spacing: <a class='enum' href='../hex2d/enum.Spacing.html' title='hex2d::Spacing'>Spacing</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>)</a></code></h4>
+<div class='docblock'><p>Convert to pixel coordinates using <code>spacing</code>, where the
+parameter means the edge length of a hexagon.</p>
+
+<p>This function is meant for graphical user interfaces
+where resolution is big enough that floating point calculation
+make sense.</p>
+</div><h4 id='method.to_pixel_integer' class='method'><code>fn <a href='#method.to_pixel_integer' class='fnname'>to_pixel_integer</a>(&amp;self, spacing: <a class='enum' href='../hex2d/enum.IntegerSpacing.html' title='hex2d::IntegerSpacing'>IntegerSpacing</a>&lt;I&gt;) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(I, I)</a></code></h4>
+<div class='docblock'><p>Convert to integer pixel coordinates using <code>spacing</code>, where the
+parameters mean the width and height multiplications</p>
+</div><h4 id='method.scale' class='method'><code>fn <a href='#method.scale' class='fnname'>scale</a>(&amp;self, s: I) -&gt; <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;</code></h4>
+<div class='docblock'><p>Scale coordinate by a factor <code>s</code></p>
+</div><h4 id='method.neighbors' class='method'><code>fn <a href='#method.neighbors' class='fnname'>neighbors</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.array.html'>[<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;; 6]</a></code></h4>
+<div class='docblock'><p>Array with all the neighbors of a coordinate</p>
+</div><h4 id='method.rotate_around_zero' class='method'><code>fn <a href='#method.rotate_around_zero' class='fnname'>rotate_around_zero</a>(&amp;self, a: <a class='enum' href='../hex2d/enum.Angle.html' title='hex2d::Angle'>Angle</a>) -&gt; <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;</code></h4>
+<div class='docblock'><p>Rotate self around a point <code>(0, 0, 0)</code> using angle of rotation <code>a</code></p>
+</div><h4 id='method.rotate_around' class='method'><code>fn <a href='#method.rotate_around' class='fnname'>rotate_around</a>(&amp;self, center: <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;, a: <a class='enum' href='../hex2d/enum.Angle.html' title='hex2d::Angle'>Angle</a>) -&gt; <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;</code></h4>
+<div class='docblock'><p>Rotate <code>self</code> around a <code>center</code> using angle of rotation <code>a</code></p>
+</div><h4 id='method.for_each_in_line_to' class='method'><code>fn <a href='#method.for_each_in_line_to' class='fnname'>for_each_in_line_to</a>&lt;F&gt;(&amp;self, dest: <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;, f: F) <span class='where'>where F: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;), &amp;'a I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.Add.html' title='core::ops::Add'>Add</a>&lt;&amp;'a I, Output=I&gt;</span></code></h4>
+<div class='docblock'><p>Execute <code>f</code> for each coordinate in straight line from <code>self</code> to <code>dest</code></p>
+</div><h4 id='method.for_each_in_line_to_lossy' class='method'><code>fn <a href='#method.for_each_in_line_to_lossy' class='fnname'>for_each_in_line_to_lossy</a>&lt;F&gt;(&amp;self, dest: <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;, f: F) <span class='where'>where F: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;), &amp;'a I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.Add.html' title='core::ops::Add'>Add</a>&lt;&amp;'a I, Output=I&gt;</span></code></h4>
+<div class='docblock'><p>Execute <code>f</code> for each coordinate in straight line from <code>self</code> to <code>dest</code></p>
+
+<p>Skip points on the border of two tiles</p>
+</div><h4 id='method.for_each_in_line_to_with_edge_detection' class='method'><code>fn <a href='#method.for_each_in_line_to_with_edge_detection' class='fnname'>for_each_in_line_to_with_edge_detection</a>&lt;F&gt;(&amp;self, dest: <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;, f: F) <span class='where'>where F: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;, <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;)</a>), &amp;'a I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.Add.html' title='core::ops::Add'>Add</a>&lt;&amp;'a I, Output=I&gt;</span></code></h4>
+<div class='docblock'><p>Execute <code>f</code> for pairs of coordinates in straight line from <code>self</code> to <code>dest</code></p>
+
+<p>On edge condition the pair contains different members, otherwise it&#39;s the same.</p>
+</div><h4 id='method.line_to' class='method'><code>fn <a href='#method.line_to' class='fnname'>line_to</a>(&amp;self, dest: <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;&gt; <span class='where'>where &amp;'a I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.Add.html' title='core::ops::Add'>Add</a>&lt;&amp;'a I, Output=I&gt;</span></code></h4>
+<div class='docblock'><p>Construct a straight line to a <code>dest</code></p>
+</div><h4 id='method.line_to_lossy' class='method'><code>fn <a href='#method.line_to_lossy' class='fnname'>line_to_lossy</a>(&amp;self, dest: <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;&gt; <span class='where'>where &amp;'a I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.Add.html' title='core::ops::Add'>Add</a>&lt;&amp;'a I, Output=I&gt;</span></code></h4>
+<div class='docblock'><p>Construct a straight line to a <code>dest</code></p>
+
+<p>Skip points on the border of two tiles</p>
+</div><h4 id='method.line_to_with_edge_detection' class='method'><code>fn <a href='#method.line_to_with_edge_detection' class='fnname'>line_to_with_edge_detection</a>(&amp;self, dest: <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;, <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;)</a>&gt; <span class='where'>where &amp;'a I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.Add.html' title='core::ops::Add'>Add</a>&lt;&amp;'a I, Output=I&gt;</span></code></h4>
+<div class='docblock'><p>Construct a straight line to a <code>dest</code></p>
+</div><h4 id='method.z' class='method'><code>fn <a href='#method.z' class='fnname'>z</a>(&amp;self) -&gt; I</code></h4>
+<div class='docblock'><p>Z coordinate</p>
+</div><h4 id='method.direction_from_center_cw' class='method'><code>fn <a href='#method.direction_from_center_cw' class='fnname'>direction_from_center_cw</a>(&amp;self) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='enum' href='../hex2d/enum.Direction.html' title='hex2d::Direction'>Direction</a>&gt;</code></h4>
+<div class='docblock'><p>Direction from center <code>(0, 0)</code> to coordinate</p>
+
+<p>In case of diagonals (edge of two major directions), prefers direction that is clockwise
+from the diagonal</p>
+
+<p>Returns:
+None if is center</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>use</span> <span class='ident'>hex2d</span>::{<span class='ident'>Direction</span>, <span class='ident'>Coordinate</span>};
+<span class='kw'>use</span> <span class='ident'>hex2d</span>::{<span class='ident'>Left</span>, <span class='ident'>Right</span>};
+
+<span class='kw'>let</span> <span class='ident'>center</span> <span class='op'>=</span> <span class='ident'>Coordinate</span>::<span class='ident'>new</span>(<span class='number'>0</span>, <span class='number'>0</span>);
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>center</span>.<span class='ident'>direction_from_center_cw</span>(), <span class='prelude-val'>None</span>);
+
+<span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='ident'>d</span> <span class='kw'>in</span> <span class='ident'>Direction</span>::<span class='ident'>all</span>() {
+    <span class='macro'>assert_eq</span><span class='macro'>!</span>((<span class='ident'>center</span> <span class='op'>+</span> <span class='ident'>d</span>).<span class='ident'>direction_from_center_cw</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>d</span>));
+    <span class='macro'>assert_eq</span><span class='macro'>!</span>((<span class='ident'>center</span> <span class='op'>+</span> <span class='ident'>d</span> <span class='op'>+</span> (<span class='ident'>d</span> <span class='op'>+</span> <span class='ident'>Left</span>)).<span class='ident'>direction_from_center_cw</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>d</span>));
+    <span class='macro'>assert_eq</span><span class='macro'>!</span>((<span class='ident'>center</span> <span class='op'>+</span> <span class='ident'>d</span> <span class='op'>+</span> (<span class='ident'>d</span> <span class='op'>+</span> <span class='ident'>Right</span>)).<span class='ident'>direction_from_center_cw</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>d</span> <span class='op'>+</span> <span class='ident'>Right</span>));
+}
+</pre>
+</div><h4 id='method.direction_from_center_ccw' class='method'><code>fn <a href='#method.direction_from_center_ccw' class='fnname'>direction_from_center_ccw</a>(&amp;self) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='enum' href='../hex2d/enum.Direction.html' title='hex2d::Direction'>Direction</a>&gt;</code></h4>
+<div class='docblock'><p>Direction from center <code>(0, 0)</code> to coordinate</p>
+
+<p>In case of diagonals (edge of two major directions), prefers direction that is
+counter-clockwise from the diagonal.</p>
+
+<p>Returns:
+None if is center</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='kw'>use</span> <span class='ident'>hex2d</span>::{<span class='ident'>Direction</span>, <span class='ident'>Coordinate</span>};
+<span class='kw'>use</span> <span class='ident'>hex2d</span>::{<span class='ident'>Left</span>, <span class='ident'>Right</span>};
+
+<span class='kw'>let</span> <span class='ident'>center</span> <span class='op'>=</span> <span class='ident'>Coordinate</span>::<span class='ident'>new</span>(<span class='number'>0</span>, <span class='number'>0</span>);
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>center</span>.<span class='ident'>direction_from_center_ccw</span>(), <span class='prelude-val'>None</span>);
+
+<span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='ident'>d</span> <span class='kw'>in</span> <span class='ident'>Direction</span>::<span class='ident'>all</span>() {
+    <span class='macro'>assert_eq</span><span class='macro'>!</span>((<span class='ident'>center</span> <span class='op'>+</span> <span class='ident'>d</span>).<span class='ident'>direction_from_center_ccw</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>d</span>));
+    <span class='macro'>assert_eq</span><span class='macro'>!</span>((<span class='ident'>center</span> <span class='op'>+</span> <span class='ident'>d</span> <span class='op'>+</span> (<span class='ident'>d</span> <span class='op'>+</span> <span class='ident'>Left</span>)).<span class='ident'>direction_from_center_ccw</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>d</span> <span class='op'>+</span> <span class='ident'>Left</span>));
+    <span class='macro'>assert_eq</span><span class='macro'>!</span>((<span class='ident'>center</span> <span class='op'>+</span> <span class='ident'>d</span> <span class='op'>+</span> (<span class='ident'>d</span> <span class='op'>+</span> <span class='ident'>Right</span>)).<span class='ident'>direction_from_center_ccw</span>(), <span class='prelude-val'>Some</span>(<span class='ident'>d</span>));
+}
+</pre>
+</div><h4 id='method.direction_to_cw' class='method'><code>fn <a href='#method.direction_to_cw' class='fnname'>direction_to_cw</a>(&amp;self, coor: <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='enum' href='../hex2d/enum.Direction.html' title='hex2d::Direction'>Direction</a>&gt;</code></h4>
+<div class='docblock'><p>Direction from self to <code>coord</code></p>
+
+<p>In case of diagonals (edge of two major directions), prefers direction that is clockwise
+from the diagonal.</p>
+
+<p>Returns:
+None if is center</p>
+</div><h4 id='method.direction_to_ccw' class='method'><code>fn <a href='#method.direction_to_ccw' class='fnname'>direction_to_ccw</a>(&amp;self, coor: <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='enum' href='../hex2d/enum.Direction.html' title='hex2d::Direction'>Direction</a>&gt;</code></h4>
+<div class='docblock'><p>Direction from self to <code>coor</code></p>
+
+<p>In case of diagonals (edge of two major directions), prefers direction that is
+counter-clockwise from the diagonal.</p>
+
+<p>Returns:
+None if is center</p>
+</div><h4 id='method.distance' class='method'><code>fn <a href='#method.distance' class='fnname'>distance</a>(&amp;self, c: <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;) -&gt; I</code></h4>
+<div class='docblock'><p>Distance between two Coordinates</p>
+</div><h4 id='method.range' class='method'><code>fn <a href='#method.range' class='fnname'>range</a>(&amp;self, r: I) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;&gt; <span class='where'>where &amp;'a I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.Add.html' title='core::ops::Add'>Add</a>&lt;&amp;'a I, Output=I&gt;</span></code></h4>
+<div class='docblock'><p>All coordinates in radius <code>r</code></p>
+</div><h4 id='method.for_each_in_range' class='method'><code>fn <a href='#method.for_each_in_range' class='fnname'>for_each_in_range</a>&lt;F&gt;(&amp;self, r: I, f: F) <span class='where'>where F: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;), &amp;'a I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.Add.html' title='core::ops::Add'>Add</a>&lt;&amp;'a I, Output=I&gt;</span></code></h4>
+<div class='docblock'><p>Execute <code>f</code> for all coordinates in radius <code>r</code></p>
+</div><h4 id='method.ring' class='method'><code>fn <a href='#method.ring' class='fnname'>ring</a>(&amp;self, r: <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>, s: <a class='enum' href='../hex2d/enum.Spin.html' title='hex2d::Spin'>Spin</a>) -&gt; <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;&gt;</code></h4>
+<div class='docblock'><p>A ring of radius <code>r</code>, starting in a corner in a given Direction</p>
+
+<p>Example: Elements in order for Ring of radius 2, Direction ZX, CCW</p>
+
+<pre><code class="language-norust">             8
+           9   7
+        10   .   6
+           .   .
+        11   x   5
+           .   .
+         0   .   4
+           1   3
+             2
+</code></pre>
+<pre id='rust-example-rendered' class='rust '>
+
+<span class='kw'>use</span> <span class='ident'>hex2d</span>::{<span class='ident'>Coordinate</span>, <span class='ident'>Spin</span>, <span class='ident'>XY</span>};
+
+<span class='kw'>let</span> <span class='ident'>center</span> <span class='op'>=</span> <span class='ident'>Coordinate</span>::<span class='ident'>new</span>(<span class='number'>5</span>, <span class='op'>-</span><span class='number'>1</span>);
+
+<span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='ident'>c</span> <span class='kw'>in</span> <span class='kw-2'>&amp;</span><span class='ident'>center</span>.<span class='ident'>neighbors</span>() {
+    <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='ident'>ring_c</span> <span class='kw'>in</span> <span class='kw-2'>&amp;</span><span class='ident'>c</span>.<span class='ident'>ring</span>(<span class='number'>5</span>, <span class='ident'>Spin</span>::<span class='ident'>CCW</span>(<span class='ident'>XY</span>)) {
+        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>c</span>.<span class='ident'>distance</span>(<span class='ident'>ring_c</span>), <span class='number'>5</span>);
+    }
+}
+</pre>
+</div><h4 id='method.for_each_in_ring' class='method'><code>fn <a href='#method.for_each_in_ring' class='fnname'>for_each_in_ring</a>&lt;F&gt;(&amp;self, r: <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>, s: <a class='enum' href='../hex2d/enum.Spin.html' title='hex2d::Spin'>Spin</a>, f: F) <span class='where'>where F: <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;)</span></code></h4>
+<div class='docblock'><p>Call <code>f</code> for each coordinate in a ring</p>
+
+<p>See <code>ring</code> for a ring description.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;I: <a class='trait' href='../hex2d/trait.Integer.html' title='hex2d::Integer'>Integer</a>&gt; <a class='trait' href='../hex2d/trait.ToCoordinate.html' title='hex2d::ToCoordinate'>ToCoordinate</a>&lt;I&gt; for <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;</code></h3><div class='impl-items'><h4 id='method.to_coordinate' class='method'><code>fn <a href='../hex2d/trait.ToCoordinate.html#method.to_coordinate' class='fnname'>to_coordinate</a>(&amp;self) -&gt; <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;</code></h4>
+</div><h3 class='impl'><code>impl&lt;I: <a class='trait' href='../hex2d/trait.Integer.html' title='hex2d::Integer'>Integer</a>, T: <a class='trait' href='../hex2d/trait.ToCoordinate.html' title='hex2d::ToCoordinate'>ToCoordinate</a>&lt;I&gt;&gt; <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.Add.html' title='core::ops::Add'>Add</a>&lt;T&gt; for <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;</code></h3><div class='impl-items'><h4 id='assoc_type.Output' class='type'><code>type Output = <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;</code></h4>
+<h4 id='method.add' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/ops/trait.Add.html#method.add' class='fnname'>add</a>(self, c: T) -&gt; <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;</code></h4>
+</div><h3 class='impl'><code>impl&lt;I: <a class='trait' href='../hex2d/trait.Integer.html' title='hex2d::Integer'>Integer</a>, T: <a class='trait' href='../hex2d/trait.ToCoordinate.html' title='hex2d::ToCoordinate'>ToCoordinate</a>&lt;I&gt;&gt; <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.Sub.html' title='core::ops::Sub'>Sub</a>&lt;T&gt; for <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;</code></h3><div class='impl-items'><h4 id='assoc_type.Output' class='type'><code>type Output = <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;</code></h4>
+<h4 id='method.sub' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/ops/trait.Sub.html#method.sub' class='fnname'>sub</a>(self, c: T) -&gt; <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;</code></h4>
+</div><h3 class='impl'><code>impl&lt;I: <a class='trait' href='../hex2d/trait.Integer.html' title='hex2d::Integer'>Integer</a>&gt; <a class='trait' href='http://doc.rust-lang.org/nightly/core/ops/trait.Neg.html' title='core::ops::Neg'>Neg</a> for <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;</code></h3><div class='impl-items'><h4 id='assoc_type.Output' class='type'><code>type Output = <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;</code></h4>
+<h4 id='method.neg' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/ops/trait.Neg.html#method.neg' class='fnname'>neg</a>(self) -&gt; <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;</code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl&lt;I: <a class='trait' href='../rustc_serialize/serialize/trait.Decodable.html' title='rustc_serialize::serialize::Decodable'>Decodable</a> + <a class='trait' href='../hex2d/trait.Integer.html' title='hex2d::Integer'>Integer</a>&gt; <a class='trait' href='../rustc_serialize/serialize/trait.Decodable.html' title='rustc_serialize::serialize::Decodable'>Decodable</a> for <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt; <span class='where'>where I: <a class='trait' href='../rustc_serialize/serialize/trait.Decodable.html' title='rustc_serialize::serialize::Decodable'>Decodable</a>, I: <a class='trait' href='../rustc_serialize/serialize/trait.Decodable.html' title='rustc_serialize::serialize::Decodable'>Decodable</a></span></code></h3><div class='impl-items'><h4 id='method.decode' class='method'><code>fn <a href='../rustc_serialize/serialize/trait.Decodable.html#method.decode' class='fnname'>decode</a>&lt;__D: <a class='trait' href='../rustc_serialize/serialize/trait.Decoder.html' title='rustc_serialize::serialize::Decoder'>Decoder</a>&gt;(__arg_0: &amp;mut __D) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;, __D&gt;</code></h4>
+</div><h3 class='impl'><code>impl&lt;I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a> + <a class='trait' href='../hex2d/trait.Integer.html' title='hex2d::Integer'>Integer</a>&gt; <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a> for <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt; <span class='where'>where I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a>, I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a></span></code></h3><div class='impl-items'><h4 id='method.partial_cmp' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html#method.partial_cmp' class='fnname'>partial_cmp</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='enum' href='http://doc.rust-lang.org/nightly/core/cmp/enum.Ordering.html' title='core::cmp::Ordering'>Ordering</a>&gt;</code></h4>
+<h4 id='method.lt' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html#method.lt' class='fnname'>lt</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.le' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html#method.le' class='fnname'>le</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.gt' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html#method.gt' class='fnname'>gt</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ge' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html#method.ge' class='fnname'>ge</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><code>impl&lt;I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.Ord.html' title='core::cmp::Ord'>Ord</a> + <a class='trait' href='../hex2d/trait.Integer.html' title='hex2d::Integer'>Integer</a>&gt; <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.Ord.html' title='core::cmp::Ord'>Ord</a> for <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt; <span class='where'>where I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.Ord.html' title='core::cmp::Ord'>Ord</a>, I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.Ord.html' title='core::cmp::Ord'>Ord</a></span></code></h3><div class='impl-items'><h4 id='method.cmp' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/cmp/trait.Ord.html#method.cmp' class='fnname'>cmp</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;) -&gt; <a class='enum' href='http://doc.rust-lang.org/nightly/core/cmp/enum.Ordering.html' title='core::cmp::Ordering'>Ordering</a></code></h4>
+</div><h3 class='impl'><code>impl&lt;I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> + <a class='trait' href='../hex2d/trait.Integer.html' title='hex2d::Integer'>Integer</a>&gt; <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt; <span class='where'>where I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a>, I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a></span></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div><h3 class='impl'><code>impl&lt;I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/hash/trait.Hash.html' title='core::hash::Hash'>Hash</a> + <a class='trait' href='../hex2d/trait.Integer.html' title='hex2d::Integer'>Integer</a>&gt; <a class='trait' href='http://doc.rust-lang.org/nightly/core/hash/trait.Hash.html' title='core::hash::Hash'>Hash</a> for <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt; <span class='where'>where I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/hash/trait.Hash.html' title='core::hash::Hash'>Hash</a>, I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/hash/trait.Hash.html' title='core::hash::Hash'>Hash</a></span></code></h3><div class='impl-items'><h4 id='method.hash' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/hash/trait.Hash.html#method.hash' class='fnname'>hash</a>&lt;__H: <a class='trait' href='http://doc.rust-lang.org/nightly/core/hash/trait.Hasher.html' title='core::hash::Hasher'>Hasher</a>&gt;(&amp;self, __arg_0: &amp;mut __H)</code></h4>
+<h4 id='method.hash_slice' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/hash/trait.Hash.html#method.hash_slice' class='fnname'>hash_slice</a>&lt;H&gt;(data: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[Self]</a>, state: &amp;mut H) <span class='where'>where H: <a class='trait' href='http://doc.rust-lang.org/nightly/core/hash/trait.Hasher.html' title='core::hash::Hasher'>Hasher</a></span></code></h4>
+</div><h3 class='impl'><code>impl&lt;I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> + <a class='trait' href='../hex2d/trait.Integer.html' title='hex2d::Integer'>Integer</a>&gt; <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt; <span class='where'>where I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a>, I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a></span></code></h3><div class='impl-items'><h4 id='method.eq' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><code>impl&lt;I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a> + <a class='trait' href='../hex2d/trait.Integer.html' title='hex2d::Integer'>Integer</a>&gt; <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a> for <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt; <span class='where'>where I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a>, I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a></span></code></h3><div class='impl-items'></div><h3 class='impl'><code>impl&lt;I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='../hex2d/trait.Integer.html' title='hex2d::Integer'>Integer</a>&gt; <a class='trait' href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt; <span class='where'>where I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a>, I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a></span></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt;</code></h4>
+<h4 id='method.clone_from' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div><h3 class='impl'><code>impl&lt;I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> + <a class='trait' href='../hex2d/trait.Integer.html' title='hex2d::Integer'>Integer</a>&gt; <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='struct' href='../hex2d/struct.Coordinate.html' title='hex2d::Coordinate'>Coordinate</a>&lt;I&gt; <span class='where'>where I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a>, I: <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a></span></code></h3><div class='impl-items'></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "hex2d";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script async src="../search-index.js"></script>
+</body>
+</html>
