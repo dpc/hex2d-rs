@@ -60,19 +60,14 @@
 #![crate_type = "lib"]
 
 #![warn(missing_docs)]
-#![feature(core)]
-#![feature(zero_one)]
-#![feature(step_trait)]
 
 extern crate num;
 extern crate rand;
 
-use num::{Float};
-use std::num::{One, Zero};
+use num::{Float, One, Zero};
+use num::iter::range_inclusive;
 use std::ops::{Add, Sub, Neg};
 use std::cmp::{max, min};
-use std::iter::range_inclusive;
-use std::iter::{Step};
 
 pub use Direction::*;
 pub use Angle::*;
@@ -81,12 +76,21 @@ use Spacing::*;
 
 
 /// Integer trait required by this library
-pub trait Integer : num::Signed+num::Integer+num::ToPrimitive+num::FromPrimitive+Step+One+Zero+Copy { }
+pub trait Integer : num::Signed +
+                    num::Integer +
+                    num::CheckedAdd +
+                    num::ToPrimitive +
+                    num::FromPrimitive +
+                    One + Zero + Copy { }
 
 impl<I> Integer for I
 where
-I : num::Signed+num::Integer+num::ToPrimitive+num::FromPrimitive+Step+One+Zero+Copy
-{ }
+I : num::Signed +
+    num::Integer +
+    num::CheckedAdd +
+    num::ToPrimitive +
+    num::FromPrimitive +
+    One + Zero + Copy { }
 
 #[cfg(test)]
 mod test;
@@ -560,12 +564,9 @@ impl<I : Integer> Coordinate<I> {
     pub fn for_each_in_range<F>(&self, r : I, mut f : F)
         where
         F : FnMut(Coordinate<I>),
-        for <'a> &'a I: Add<&'a I, Output = I>
-        {
-            let one : I = One::one();
-
-        for x in -r..(r + one) {
-            for y in max(-r, -x-r)..min(r, -x+r) + one {
+        for <'a> &'a I: Add<&'a I, Output = I> {
+        for x in range_inclusive(-r, r) {
+            for y in range_inclusive(max(-r, -x-r), min(r, -x+r)) {
                 f(Coordinate{
                     x: self.x + x,
                     y: self.y + y,
