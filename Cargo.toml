@@ -18,3 +18,4 @@ path = "src/lib.rs"
 [dependencies]
 num = "*"
 rand = "*"
+rustc-serialize = "*"
