@@ -127,10 +127,13 @@ pub struct Position<I : Integer = i32> {
     pub dir : Direction,
 }
 
-
 /// Direction on a hexagonal map
 ///
 /// See `Coordinate` for graph with directions.
+///
+/// Naming convention: increasing coordinate for a given direction is first
+/// decreasing is second. The missing coordinate is unaffected by a move in
+/// a given direction.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd, RustcDecodable)]
 pub enum Direction {
     /// +Y -Z
@@ -206,15 +209,13 @@ impl<I : Integer> Coordinate<I> {
         Coordinate { x: x, y: y}
     }
 
-    /// Scale coordinate by a factor `s`
-    pub fn scale(&self, s : I) -> Coordinate<I> {
-        let x = self.x * s;
-        let y = self.y * s;
-        Coordinate{ x: x, y: y }
+    /// Old name for `nearest`
+    pub fn from_round(x : f32, y : f32) -> Coordinate<I> {
+        Coordinate::nearest(x, y)
     }
 
     /// Round x, y float to nearest hex coordinates
-    pub fn from_round(x : f32, y : f32) -> Coordinate<I> {
+    pub fn nearest(x : f32, y : f32) -> Coordinate<I> {
         let z = 0f32 - x - y;
 
         let mut rx = x.round();
@@ -240,10 +241,15 @@ impl<I : Integer> Coordinate<I> {
         }
     }
 
+    /// Old name for `nearest_lossy`
+    pub fn from_round_lossy(x : f32, y : f32) -> Option<Coordinate<I>> {
+        Coordinate::nearest_lossy(x, y)
+    }
+
     /// Round x, y float to nearest hex coordinates
     ///
     /// Return None, if exactly on the border of two hex coordinates
-    pub fn from_round_lossy(x : f32, y : f32) -> Option<Coordinate<I>> {
+    pub fn nearest_lossy(x : f32, y : f32) -> Option<Coordinate<I>> {
         let z = 0f32 - x - y;
 
         let mut rx = x.round();
@@ -274,6 +280,131 @@ impl<I : Integer> Coordinate<I> {
             x: num::FromPrimitive::from_f32(rx).unwrap(),
             y: num::FromPrimitive::from_f32(ry).unwrap(),
         })
+    }
+
+    /// Old name for `nearest_with_offset`
+    pub fn from_pixel_integer(spacing : IntegerSpacing<I>, v : (I, I)) -> (Coordinate<I>, (I, I)) {
+        Coordinate::nearest_with_offset(spacing, v)
+    }
+
+    /// Convert integer pixel coordinates `v` using `spacing` to nearest coordinate that has both
+    /// integer pixel coordinates lower or equal to `v`. Also return offset (in integer pixels)
+    /// from that coordinate.
+    ///
+    /// Useful for ASCII visualization.
+    // Took me a while to figure this out, but it seems to work. Brilliant.
+    pub fn nearest_with_offset(spacing : IntegerSpacing<I>, v : (I, I)) -> (Coordinate<I>, (I, I)) {
+        let (asc_x, asc_y) = v;
+
+        let two : I = num::FromPrimitive::from_i8(2).unwrap();
+
+        let ((q, qo),(r, ro)) = match spacing {
+            IntegerSpacing::FlatTop(w, h) => (
+                (asc_x.div_floor(&w), asc_x.mod_floor(&w)),
+                (
+                    (asc_y - h * asc_x.div_floor(&w) / two).div_floor(&h),
+                    (asc_y + h / two * asc_x.div_floor(&w)).mod_floor(&h)
+                )
+                ),
+            IntegerSpacing::PointyTop(w, h) => (
+                (
+                    (asc_x - w * asc_y.div_floor(&h) / two).div_floor(&w),
+                    (asc_x + w / two * asc_y.div_floor(&h)).mod_floor(&w)
+                ),
+                (asc_y.div_floor(&h),  asc_y.mod_floor(&h))
+                ),
+        };
+
+        let coord = Coordinate{ x: q, y: -q - r };
+        (coord, (qo, ro))
+    }
+
+    /// Old name for `to_pixel`
+    pub fn to_pixel_float(&self, spacing : Spacing) -> (f32, f32) {
+        self.to_pixel(spacing)
+    }
+
+    /// Convert to pixel coordinates using `spacing`, where the
+    /// parameter means the edge length of a hexagon.
+    ///
+    /// This function is meant for graphical user interfaces
+    /// where resolution is big enough that floating point calculation
+    /// make sense.
+    pub fn to_pixel(&self, spacing : Spacing) -> (f32, f32) {
+        let q = self.x.to_f32().unwrap();
+        let r = self.z().to_f32().unwrap();
+        match spacing {
+            FlatTop(s) => (
+                s * 3f32 / 2f32 * q,
+                s * 3f32.sqrt() * (r + q / 2f32)
+                ),
+            PointyTop(s) => (
+                s * 3f32.sqrt() * (q + r / 2f32),
+                s * 3f32 / 2f32 * r
+                )
+        }
+    }
+
+    /// Convert to integer pixel coordinates using `spacing`, where the
+    /// parameters mean the width and height multiplications
+    pub fn to_pixel_integer(&self, spacing : IntegerSpacing<I>) -> (I, I) {
+        let q = self.x;
+        let r = self.z();
+        let two = num::FromPrimitive::from_i8(2).unwrap();
+
+        match spacing {
+            IntegerSpacing::FlatTop(w, h) => (
+                w * q,
+                h * (r + r + q) / two
+                ),
+            IntegerSpacing::PointyTop(w, h) => (
+                w * (q + q + r) / two,
+                h * r
+                )
+        }
+    }
+
+    /// Scale coordinate by a factor `s`
+    pub fn scale(&self, s : I) -> Coordinate<I> {
+        let x = self.x * s;
+        let y = self.y * s;
+        Coordinate{ x: x, y: y }
+    }
+
+    /// Array with all the neighbors of a coordinate
+    pub fn neighbors(&self) -> [Coordinate<I>; 6] {
+        [
+            *self + YZ,
+            *self + XZ,
+            *self + XY,
+            *self + ZY,
+            *self + ZX,
+            *self + YX,
+        ]
+    }
+
+    /// Rotate self around a point `(0, 0, 0)` using angle of rotation `a`
+    pub fn rotate_around_zero(&self, a : Angle) -> Coordinate<I> {
+
+        let (x, y, z) = (self.x, self.y, self.z());
+
+        let (x, y) = match a {
+            Forward => (x, y),
+            Right => (-z, -x),
+            RightBack => (y, z),
+            Back => (-x, -y),
+            LeftBack => (z, x),
+            Left => (-y, -z),
+        };
+
+        Coordinate{ x: x, y: y}
+    }
+
+    /// Rotate `self` around a `center` using angle of rotation `a`
+    pub fn rotate_around(&self, center : Coordinate<I>, a : Angle) -> Coordinate<I> {
+        let rel_p = *self - center;
+        let rot_p = rel_p.rotate_around_zero(a);
+        rot_p + center
     }
 
     /// Execute `f` for each coordinate in straight line from `self` to `dest`
@@ -364,8 +495,6 @@ impl<I : Integer> Coordinate<I> {
             }
     }
 
-
-
     /// Construct a straight line to a `dest`
     pub fn line_to(&self, dest : Coordinate<I>) -> Vec<Coordinate<I>>
     where
@@ -379,7 +508,6 @@ impl<I : Integer> Coordinate<I> {
 
         res
     }
-
 
     /// Construct a straight line to a `dest`
     ///
@@ -396,8 +524,6 @@ impl<I : Integer> Coordinate<I> {
 
         res
     }
-
-
 
     /// Construct a straight line to a `dest`
     pub fn line_to_with_edge_detection(&self, dest : Coordinate<I>) -> Vec<(Coordinate<I>, Coordinate<I>)>
@@ -531,18 +657,6 @@ impl<I : Integer> Coordinate<I> {
         (coor - *self).direction_from_center_ccw()
     }
 
-    /// Array with all the neighbors of a coordinate
-    pub fn neighbors(&self) -> [Coordinate<I>; 6] {
-        [
-            *self + YZ,
-            *self + XZ,
-            *self + XY,
-            *self + ZY,
-            *self + ZX,
-            *self + YX,
-        ]
-    }
-
     /// Distance between two Coordinates
     pub fn distance(&self, c : Coordinate<I>) -> I {
         ((self.x - c.x).abs() + (self.y - c.y).abs() + (self.z() - c.z()).abs())
@@ -641,100 +755,6 @@ impl<I : Integer> Coordinate<I> {
             cur_dir = cur_dir + step_angle;
         }
     }
-
-    /// Convert to pixel coordinates using `spacing`, where the
-    /// parameter means the edge length of a hexagon.
-    ///
-    /// This function is meant for graphical user interfaces
-    /// where resolution is big enough that floating point calculation
-    /// make sense.
-    pub fn to_pixel_float(&self, spacing : Spacing) -> (f32, f32) {
-        let q = self.x.to_f32().unwrap();
-        let r = self.z().to_f32().unwrap();
-        match spacing {
-            FlatTop(s) => (
-                s * 3f32 / 2f32 * q,
-                s * 3f32.sqrt() * (r + q / 2f32)
-                ),
-            PointyTop(s) => (
-                s * 3f32.sqrt() * (q + r / 2f32),
-                s * 3f32 / 2f32 * r
-                )
-        }
-    }
-
-    /// Convert to integer pixel coordinates using `spacing`, where the
-    /// parameters mean the width and height multiplications
-    pub fn to_pixel_integer(&self, spacing : IntegerSpacing<I>) -> (I, I) {
-        let q = self.x;
-        let r = self.z();
-        let two = num::FromPrimitive::from_i8(2).unwrap();
-
-        match spacing {
-            IntegerSpacing::FlatTop(w, h) => (
-                w * q,
-                h * (r + r + q) / two
-                ),
-            IntegerSpacing::PointyTop(w, h) => (
-                w * (q + q + r) / two,
-                h * r
-                )
-        }
-    }
-
-    /// Convert integer pixel coordinates `v` using `spacing` to nearest coordinate that has both
-    /// integer pixel coordinates lower or equal to `v`. Also return offset (in integer pixels)
-    /// from that coordinate.
-    // Took me a while to figure this out, but it seems to work. Brilliant.
-    pub fn from_pixel_integer(spacing : IntegerSpacing<I>, v : (I, I)) -> (Coordinate<I>, (I, I)) {
-        let (asc_x, asc_y) = v;
-
-        let two : I = num::FromPrimitive::from_i8(2).unwrap();
-
-        let ((q, qo),(r, ro)) = match spacing {
-            IntegerSpacing::FlatTop(w, h) => (
-                (asc_x.div_floor(&w), asc_x.mod_floor(&w)),
-                (
-                    (asc_y - h * asc_x.div_floor(&w) / two).div_floor(&h),
-                    (asc_y + h / two * asc_x.div_floor(&w)).mod_floor(&h)
-                )
-                ),
-            IntegerSpacing::PointyTop(w, h) => (
-                (
-                    (asc_x - w * asc_y.div_floor(&h) / two).div_floor(&w),
-                    (asc_x + w / two * asc_y.div_floor(&h)).mod_floor(&w)
-                ),
-                (asc_y.div_floor(&h),  asc_y.mod_floor(&h))
-                ),
-        };
-
-        let coord = Coordinate{ x: q, y: -q - r };
-        (coord, (qo, ro))
-    }
-
-    /// Rotate self around a point `(0, 0, 0)` using angle of rotation `a`
-    pub fn rotate_around_zero(&self, a : Angle) -> Coordinate<I> {
-
-        let (x, y, z) = (self.x, self.y, self.z());
-
-        let (x, y) = match a {
-            Forward => (x, y),
-            Right => (-z, -x),
-            RightBack => (y, z),
-            Back => (-x, -y),
-            LeftBack => (z, x),
-            Left => (-y, -z),
-        };
-
-        Coordinate{ x: x, y: y}
-    }
-
-    /// Rotate `self` around a `center` using angle of rotation `a`
-    pub fn rotate_around(&self, center : Coordinate<I>, a : Angle) -> Coordinate<I> {
-        let rel_p = *self - center;
-        let rot_p = rel_p.rotate_around_zero(a);
-        rot_p + center
-    }
 }
 
 impl<I : Integer> ToCoordinate<I> for Coordinate<I> {
@@ -775,7 +795,6 @@ impl<I : Integer, T: ToCoordinate<I>> Sub<T> for Coordinate<I> {
         }
     }
 }
-
 
 impl<I : Integer> Neg for Coordinate<I>
 {
@@ -989,4 +1008,3 @@ impl Add<Angle> for Direction {
         Direction::from_int(self.to_int::<i8>() + a.to_int::<i8>())
     }
 }
-
