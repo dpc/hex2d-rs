@@ -1,6 +1,17 @@
-[![Build Status](https://travis-ci.org/dpc/hex2d-rs.svg?branch=master)](https://travis-ci.org/dpc/hex2d-rs)
-
 # hex2d
+
+<p align="center">
+  <a href="https://travis-ci.org/dpc/hex2d-rs">
+      <img src="https://img.shields.io/travis/dpc/hex2d-rs/master.svg?style=flat-square" alt="Build Status">
+  </a>
+  <a href="https://crates.io/crates/hex2d">
+      <img src="http://meritbadge.herokuapp.com/hex2d?style=flat-square" alt="crates.io">
+  </a>
+  <img src="https://img.shields.io/badge/GITTER-join%20chat-green.svg?style=flat-square" alt="Gitter Chat">
+  <br>
+  <strong><a href="//dpc.github.io/hex2d-rs/">Documentation</a></strong>
+</p>
+
 
 ## Introduction
 
