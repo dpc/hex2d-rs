@@ -287,6 +287,23 @@ impl<I : Integer> Coordinate<I> {
         Coordinate::nearest_with_offset(spacing, v)
     }
 
+    /// Find the hex containing a pixel. The origin of the pixel coordinates
+    /// is the center of the hex at (0,0) in hex coordinates.
+    pub fn from_pixel(x: f32, y: f32, spacing: Spacing) -> Coordinate<I> {
+        match spacing {
+            Spacing::PointyTop(size) => {
+                let q = (x * 3f32.sqrt()/3f32 - y / 3f32) / size;
+                let r = y * 2f32/3f32 / size;
+                return Coordinate::nearest(q, -r -q);
+            },
+            Spacing::FlatTop(size) => {
+                let q = x * 2f32/3f32 / size;
+                let r = (-x / 3f32 + 3f32.sqrt()/3f32 * y) / size;
+                return Coordinate::nearest(q, -r -q);
+            }
+        }
+    }
+
     /// Convert integer pixel coordinates `v` using `spacing` to nearest coordinate that has both
     /// integer pixel coordinates lower or equal to `v`. Also return offset (in integer pixels)
     /// from that coordinate.

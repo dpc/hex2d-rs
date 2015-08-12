@@ -209,6 +209,20 @@ fn simple_to_pixel() {
 #[test]
 fn simple_from_pixel() {
     for &spacing in [
+        Spacing::PointyTop(30.0),
+        Spacing::PointyTop(-40.0),
+        Spacing::FlatTop(100.0)
+    ].iter() {
+        with_test_points(|c : Coordinate| {
+            let (x, y) = c.to_pixel(spacing);
+            assert_eq!(c, Coordinate::from_pixel(x, y, spacing));
+        });
+    }
+}
+
+#[test]
+fn simple_from_pixel_integer() {
+    for &spacing in [
         IntegerSpacing::PointyTop(2, 1),
         IntegerSpacing::PointyTop(4, 6),
         IntegerSpacing::FlatTop(3, 2),
