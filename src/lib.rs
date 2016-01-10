@@ -607,6 +607,46 @@ impl<I : Integer> Coordinate<I> {
         }
     }
 
+    /**
+     * Directions that lead from center to a given point.
+     *
+     * Returns an array of one or two dirs.
+     */
+    pub fn directions_from_center(&self) -> Vec<Direction> {
+        let x = self.x;
+        let y = self.y;
+        let z = self.z();
+        let zero : I = num::FromPrimitive::from_i8(0).unwrap();
+
+        let mut dirs = vec!();
+
+        if x > zero && z < zero {
+            dirs.push(XZ)
+        }
+
+        if x > zero && y < zero {
+            dirs.push(XY)
+        }
+
+        if z > zero && y < zero {
+            dirs.push(ZY)
+        }
+
+        if z > zero && x < zero {
+            dirs.push(ZX)
+        }
+
+        if y > zero && z < zero {
+            dirs.push(YZ)
+        }
+
+        if y > zero && x < zero {
+            dirs.push(YX)
+        }
+
+        dirs
+    }
+
     /// Direction from center `(0, 0)` to coordinate
     ///
     /// In case of diagonals (edge of two major directions), prefers direction that is
@@ -650,6 +690,11 @@ impl<I : Integer> Coordinate<I> {
             (false, false, false) => None,
             (true, true, true) => panic!("You broke math"),
         }
+    }
+
+    /// Directions from self to `coord`
+    pub fn directions_to(&self, coord : Coordinate<I>) -> Vec<Direction> {
+        (coord - *self).directions_from_center()
     }
 
     /// Direction from self to `coord`
