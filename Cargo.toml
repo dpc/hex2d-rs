@@ -1,13 +1,13 @@
 [package]
 name = "hex2d"
-version = "0.0.14"
+version = "0.1.0"
 authors = [ "Dawid Ciężarkiewicz <dpc@dpc.pw>" ]
 description = "Helper library for working with 2d hex-grid maps"
 documentation = "http://dpc.github.io/hex2d-rs/"
 repository = "https://github.com/dpc/hex2d-rs"
 homepage = "https://github.com/dpc/hex2d-rs"
 readme = "README.md"
-keywords = ["game", "map", "hex"]
+keywords = ["game", "map", "hex", "hexagonal", "coordinate"]
 license = "MIT"
 
 [lib]
