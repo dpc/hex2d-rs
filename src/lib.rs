@@ -731,7 +731,7 @@ impl<I : Integer> Coordinate<I> {
         for <'a> &'a I: Add<&'a I, Output = I>
     {
 
-        let rc = if r < Zero::zero() { (I::one()-r).to_usize().unwrap() } else { r.to_usize().unwrap() };
+        let rc = (if r < Zero::zero() { I::one()-r } else { r }).to_usize().unwrap();
         let mut res = Vec::with_capacity(3*(rc+rc*rc)+1);
         self.for_each_in_range(r, |c| res.push(c));
 
