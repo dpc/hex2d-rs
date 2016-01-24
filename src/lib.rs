@@ -731,7 +731,7 @@ impl<I : Integer> Coordinate<I> {
         for <'a> &'a I: Add<&'a I, Output = I>
     {
 
-        let rc = if r < 0 { 1-r } else { r };
+        let rc = if r < Zero::zero() { (I::one()-r).to_usize().unwrap() } else { r.to_usize().unwrap() };
         let mut res = Vec::with_capacity(3*(rc+rc*rc)+1);
         self.for_each_in_range(r, |c| res.push(c));
 
@@ -782,7 +782,7 @@ impl<I : Integer> Coordinate<I> {
     /// }
     /// ```
     pub fn ring(&self, r : i32, s : Spin) -> Vec<Coordinate<I>> {
-        let mut res = Vec::with_capacity(if r == 0 { 1 } else if r < 0 { r*-6 } else { r*6 });
+        let mut res = Vec::with_capacity(if r == 0 { 1 } else if r < 0 { (r*-6) as usize } else { (r*6) as usize });
         self.for_each_in_ring(r, s, |c| res.push(c));
 
         res
