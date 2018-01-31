@@ -196,14 +196,14 @@ fn simple_to_pixel() {
 
     {
         let c = Coordinate::new(0, 0);
-        assert_eq!(c.to_pixel_float(p_spacing), (0f32, 0f32));
-        assert_eq!(c.to_pixel_float(f_spacing), (0f32, 0f32));
+        assert_eq!(c.to_pixel(p_spacing), (0f32, 0f32));
+        assert_eq!(c.to_pixel(f_spacing), (0f32, 0f32));
     }
 
-    assert_eq!((2i32, -1i32).to_coordinate().to_pixel_float(f_spacing), (6f32, 0f32));
-    assert_eq!((-2i32, 1i32).to_coordinate().to_pixel_float(f_spacing), (-6f32, 0f32));
-    assert_eq!((1i32, 1i32).to_coordinate().to_pixel_float(p_spacing), (0f32, -6f32));
-    assert_eq!((2i32, 2i32).to_coordinate().to_pixel_float(p_spacing), (0f32, -12f32));
+    assert_eq!((2i32, -1i32).to_coordinate().to_pixel(f_spacing), (6f32, 0f32));
+    assert_eq!((-2i32, 1i32).to_coordinate().to_pixel(f_spacing), (-6f32, 0f32));
+    assert_eq!((1i32, 1i32).to_coordinate().to_pixel(p_spacing), (0f32, -6f32));
+    assert_eq!((2i32, 2i32).to_coordinate().to_pixel(p_spacing), (0f32, -12f32));
 }
 
 #[test]
@@ -229,7 +229,7 @@ fn simple_from_pixel_integer() {
     ].iter() {
         with_test_points(|c : Coordinate| {
             let ascii_pix = c.to_pixel_integer(spacing);
-            let (coord, pix_off) = Coordinate::from_pixel_integer(spacing, ascii_pix);
+            let (coord, pix_off) = Coordinate::nearest_with_offset(spacing, ascii_pix);
             assert_eq!((c, (0, 0)), (coord, pix_off));
         });
     }
