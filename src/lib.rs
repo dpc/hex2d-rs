@@ -210,6 +210,7 @@ impl<I : Integer> Coordinate<I> {
     }
 
     /// Old name for `nearest`
+    #[deprecated(note="use `nearest` instead")]
     pub fn from_round(x : f32, y : f32) -> Coordinate<I> {
         Coordinate::nearest(x, y)
     }
@@ -242,6 +243,7 @@ impl<I : Integer> Coordinate<I> {
     }
 
     /// Old name for `nearest_lossy`
+    #[deprecated(note="use `nearest_lossy` instead")]
     pub fn from_round_lossy(x : f32, y : f32) -> Option<Coordinate<I>> {
         Coordinate::nearest_lossy(x, y)
     }
@@ -283,6 +285,7 @@ impl<I : Integer> Coordinate<I> {
     }
 
     /// Old name for `nearest_with_offset`
+    #[deprecated(note="use `nearest_with_offset` instead")]
     pub fn from_pixel_integer(spacing : IntegerSpacing<I>, v : (I, I)) -> (Coordinate<I>, (I, I)) {
         Coordinate::nearest_with_offset(spacing, v)
     }
@@ -337,6 +340,7 @@ impl<I : Integer> Coordinate<I> {
     }
 
     /// Old name for `to_pixel`
+    #[deprecated(note="use `to_pixel` instead")]
     pub fn to_pixel_float(&self, spacing : Spacing) -> (f32, f32) {
         self.to_pixel(spacing)
     }
@@ -446,7 +450,7 @@ impl<I : Integer> Coordinate<I> {
                 let d = i.to_f32().unwrap() / n.to_f32().unwrap();
                 let x = ax + (bx - ax) * d;
                 let y = ay + (by - ay) * d;
-                let c = Coordinate::from_round(x, y);
+                let c = Coordinate::nearest(x, y);
                 f(c);
             }
     }
@@ -475,7 +479,7 @@ impl<I : Integer> Coordinate<I> {
                 let d = i.to_f32().unwrap() / n.to_f32().unwrap();
                 let x = ax + (bx - ax) * d;
                 let y = ay + (by - ay) * d;
-                let c = Coordinate::from_round_lossy(x, y);
+                let c = Coordinate::nearest_lossy(x, y);
                 if let Some(c) = c {
                     f(c);
                 }
@@ -506,8 +510,8 @@ impl<I : Integer> Coordinate<I> {
                 let d = i.to_f32().unwrap() / n.to_f32().unwrap();
                 let x = ax + (bx - ax) * d;
                 let y = ay + (by - ay) * d;
-                let c1 = Coordinate::from_round(x + 0.000001, y + 0.000001);
-                let c2 = Coordinate::from_round(x - 0.000001, y - 0.000001);
+                let c1 = Coordinate::nearest(x + 0.000001, y + 0.000001);
+                let c2 = Coordinate::nearest(x - 0.000001, y - 0.000001);
                 f((c1, c2));
             }
     }
@@ -607,11 +611,9 @@ impl<I : Integer> Coordinate<I> {
         }
     }
 
-    /**
-     * Directions that lead from center to a given point.
-     *
-     * Returns an array of one or two dirs.
-     */
+    /// Directions that lead from center to a given point.
+    ///
+    /// Returns an array of one or two directions.
     pub fn directions_from_center(&self) -> Vec<Direction> {
         let x = self.x;
         let y = self.y;
