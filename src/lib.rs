@@ -73,6 +73,7 @@ use num::{Float, One, Zero};
 use num::iter::range_inclusive;
 use std::ops::{Add, Sub, Neg};
 use std::cmp::{max, min};
+use std::f64::consts::PI;
 
 pub use Direction::*;
 pub use Angle::*;
@@ -997,6 +998,23 @@ impl Direction {
     /// This should probably be internal
     pub fn to_int<I : Integer>(&self) -> I {
        num::FromPrimitive::from_u8(*self as u8).unwrap()
+    }
+
+    /// Convert to angle for pointy-topped map, in radians, grows clockwise, 0.0 points up
+    pub fn to_radians_pointy<T: Float>(&self) -> T {
+        T::from(match *self {
+            Direction::YZ => PI * (5.5 / 3.0),
+            Direction::XZ => PI * (0.5 / 3.0),
+            Direction::XY => PI * (1.5 / 3.0),
+            Direction::ZY => PI * (2.5 / 3.0),
+            Direction::ZX => PI * (3.5 / 3.0),
+            Direction::YX => PI * (4.5 / 3.0),
+        }).unwrap()
+    }
+
+    /// Convert to angle for flat-topped map, in radians, grows clockwise, 0.0 points up
+    pub fn to_radians_flat<T: Float>(&self) -> T {
+        self.to_radians_pointy::<T>() + T::from(PI * (0.5 / 3.0)).unwrap()
     }
 }
 
