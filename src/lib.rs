@@ -360,7 +360,7 @@ impl<I : Integer> Coordinate<I> {
 
     /// Old name for `to_pixel`
     #[deprecated(note="use `to_pixel` instead")]
-    pub fn to_pixel_float(&self, spacing : Spacing) -> (f32, f32) {
+    pub fn to_pixel_float<F: Float>(&self, spacing : Spacing<F>) -> (F, F) {
         self.to_pixel(spacing)
     }
 
