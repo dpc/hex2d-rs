@@ -1,8 +1,12 @@
 language: rust
 rust:
-  - 1.0.0
+  - stable
   - beta
   - nightly
+cache: cargo
+matrix:
+  allow_failures:
+    - rust: nightly
 env:
   - DOCS_DEFAULT_MODULE=hex2d
 script:
