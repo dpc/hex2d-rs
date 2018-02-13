@@ -87,6 +87,7 @@ pub trait Integer : num::Signed +
                     num::CheckedAdd +
                     num::ToPrimitive +
                     num::FromPrimitive +
+                    num::NumCast +
                     One + Zero + Copy { }
 
 impl<I> Integer for I
@@ -96,6 +97,7 @@ I : num::Signed +
     num::CheckedAdd +
     num::ToPrimitive +
     num::FromPrimitive +
+    num::NumCast +
     One + Zero + Copy { }
 
 #[cfg(test)]
