@@ -230,8 +230,9 @@ impl<I : Integer> Coordinate<I> {
     }
 
     /// Round x, y float to nearest hex coordinates
-    pub fn nearest(x : f32, y : f32) -> Coordinate<I> {
-        let z = 0f32 - x - y;
+    pub fn nearest<F: Float>(x : F, y : F) -> Coordinate<I> {
+        let zero: F = Zero::zero();
+        let z: F = zero - x - y;
 
         let mut rx = x.round();
         let mut ry = y.round();
@@ -251,8 +252,8 @@ impl<I : Integer> Coordinate<I> {
         }
 
         Coordinate {
-            x: num::FromPrimitive::from_f32(rx).unwrap(),
-            y: num::FromPrimitive::from_f32(ry).unwrap(),
+            x: I::from(rx).unwrap(),
+            y: I::from(ry).unwrap(),
         }
     }
 
