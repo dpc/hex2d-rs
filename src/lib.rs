@@ -63,7 +63,11 @@
 
 extern crate num;
 extern crate rand;
-extern crate rustc_serialize;
+#[cfg(feature="serde-serde")]
+extern crate serde;
+#[cfg(feature="serde-serde")]
+#[macro_use]
+extern crate serde_derive;
 
 use num::{Float, One, Zero};
 use num::iter::range_inclusive;
@@ -97,7 +101,8 @@ I : num::Signed +
 mod test;
 
 /// Coordinate on 2d hexagonal grid
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd, RustcDecodable)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
+#[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
 pub struct Coordinate<I : Integer = i32> {
     /// `x` coordinate
     pub x : I,
@@ -119,7 +124,8 @@ pub trait ToDirection {
 
 
 /// Position on 2d hexagonal grid (Coordinate + Direction)
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd, RustcDecodable)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
+#[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
 pub struct Position<I : Integer = i32> {
     /// `x` coordinate
     pub coord : Coordinate<I>,
@@ -134,7 +140,8 @@ pub struct Position<I : Integer = i32> {
 /// Naming convention: increasing coordinate for a given direction is first
 /// decreasing is second. The missing coordinate is unaffected by a move in
 /// a given direction.
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd, RustcDecodable)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
+#[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
 pub enum Direction {
     /// +Y -Z
     YZ = 0,
@@ -155,7 +162,8 @@ static ALL_DIRECTIONS : [Direction; 6] = [ YZ, XZ, XY, ZY, ZX, YX ];
 static ALL_ANGLES : [Angle; 6] = [ Forward, Right, RightBack, Back, LeftBack, Left];
 
 /// Angle, relative to a Direction
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd, RustcDecodable)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
+#[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
 pub enum Angle {
     /// 0deg clockwise
     Forward = 0,
@@ -172,7 +180,8 @@ pub enum Angle {
 }
 
 /// Spinning directions
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd, RustcDecodable)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
+#[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
 pub enum Spin {
     /// Clockwise
     CW(Direction),
@@ -181,7 +190,8 @@ pub enum Spin {
 }
 
 /// Floating point tile size for pixel conversion functions
-#[derive(Copy, Clone, PartialEq, Debug, PartialOrd, RustcDecodable)]
+#[derive(Copy, Clone, PartialEq, Debug, PartialOrd)]
+#[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
 pub enum Spacing {
     /// Hex-grid with an edge on top
     FlatTop(f32),
@@ -195,7 +205,8 @@ pub enum Spacing {
 ///
 /// * FlatTop(3, 2)
 /// * PointyTop(2, 1)
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, Ord, PartialOrd, RustcDecodable)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, Ord, PartialOrd)]
+#[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
 pub enum IntegerSpacing<I> {
     /// Hex-grid with an edge on top
     FlatTop(I, I),

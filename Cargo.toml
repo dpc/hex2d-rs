@@ -14,8 +14,14 @@ license = "MIT"
 name = "hex2d"
 path = "src/lib.rs"
 
+[features]
+default = [ "serde-serde" ]
+# Needs a different name due to: https://github.com/rust-lang/cargo/issues/1286
+serde-serde = ["serde", "serde_derive"]
 
 [dependencies]
 num = "0.1"
 rand = "0.4"
-rustc-serialize = "0.3"
+
+serde = { version="1.0",optional=true }
+serde_derive = { version="1.0", optional=true }
