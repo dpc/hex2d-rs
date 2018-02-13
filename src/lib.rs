@@ -195,11 +195,11 @@ pub enum Spin {
 /// Floating point tile size for pixel conversion functions
 #[derive(Copy, Clone, PartialEq, Debug, PartialOrd)]
 #[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
-pub enum Spacing {
+pub enum Spacing<F=f32> {
     /// Hex-grid with an edge on top
-    FlatTop(f32),
+    FlatTop(F),
     /// Hex-grid with a corner on top
-    PointyTop(f32),
+    PointyTop(F),
 }
 
 /// Integer pixel tile size for integer pixel conversion functions
@@ -308,16 +308,19 @@ impl<I : Integer> Coordinate<I> {
 
     /// Find the hex containing a pixel. The origin of the pixel coordinates
     /// is the center of the hex at (0,0) in hex coordinates.
-    pub fn from_pixel(x: f32, y: f32, spacing: Spacing) -> Coordinate<I> {
+    pub fn from_pixel<F: Float>(x: F, y: F, spacing: Spacing<F>) -> Coordinate<I> {
+        let f3: F = F::from(3).unwrap();
+        let f2: F = F::from(2).unwrap();
+        let f3s: F = f3.sqrt();
         match spacing {
             Spacing::PointyTop(size) => {
-                let q = (x * 3f32.sqrt()/3f32 - y / 3f32) / size;
-                let r = y * 2f32/3f32 / size;
+                let q = (x * f3s/f3 - y / f3) / size;
+                let r = y * f2/f3 / size;
                 return Coordinate::nearest(q, -r -q);
             },
             Spacing::FlatTop(size) => {
-                let q = x * 2f32/3f32 / size;
-                let r = (-x / 3f32 + 3f32.sqrt()/3f32 * y) / size;
+                let q = x * f2/f3 / size;
+                let r = (-x / f3 + f3s/f3 * y) / size;
                 return Coordinate::nearest(q, -r -q);
             }
         }
