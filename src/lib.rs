@@ -370,17 +370,20 @@ impl<I : Integer> Coordinate<I> {
     /// This function is meant for graphical user interfaces
     /// where resolution is big enough that floating point calculation
     /// make sense.
-    pub fn to_pixel(&self, spacing : Spacing) -> (f32, f32) {
-        let q = self.x.to_f32().unwrap();
-        let r = self.z().to_f32().unwrap();
+    pub fn to_pixel<F: Float>(&self, spacing : Spacing<F>) -> (F, F) {
+        let f3: F = F::from(3).unwrap();
+        let f2: F = F::from(2).unwrap();
+        let f3s: F = f3.sqrt();
+        let q: F = F::from(self.x).unwrap();
+        let r: F = F::from(self.z()).unwrap();
         match spacing {
             FlatTop(s) => (
-                s * 3f32 / 2f32 * q,
-                s * 3f32.sqrt() * (r + q / 2f32)
+                s * f3 / f2 * q,
+                s * f3s * (r + q / f2)
                 ),
             PointyTop(s) => (
-                s * 3f32.sqrt() * (q + r / 2f32),
-                s * 3f32 / 2f32 * r
+                s * f3s * (q + r / f2),
+                s * f3 / f2 * r
                 )
         }
     }
