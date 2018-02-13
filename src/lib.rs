@@ -266,8 +266,9 @@ impl<I : Integer> Coordinate<I> {
     /// Round x, y float to nearest hex coordinates
     ///
     /// Return None, if exactly on the border of two hex coordinates
-    pub fn nearest_lossy(x : f32, y : f32) -> Option<Coordinate<I>> {
-        let z = 0f32 - x - y;
+    pub fn nearest_lossy<F: Float>(x : F, y : F) -> Option<Coordinate<I>> {
+        let zero: F = Zero::zero();
+        let z: F = zero - x - y;
 
         let mut rx = x.round();
         let mut ry = y.round();
@@ -289,13 +290,13 @@ impl<I : Integer> Coordinate<I> {
         let y_diff = (ry - y).abs();
         let z_diff = (rz - z).abs();
 
-        if x_diff + y_diff + z_diff > 0.99 {
+        if x_diff + y_diff + z_diff > F::from(0.99).unwrap() {
             return None;
         }
 
         Some(Coordinate {
-            x: num::FromPrimitive::from_f32(rx).unwrap(),
-            y: num::FromPrimitive::from_f32(ry).unwrap(),
+            x: I::from(rx).unwrap(),
+            y: I::from(ry).unwrap(),
         })
     }
 
