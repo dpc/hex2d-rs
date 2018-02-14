@@ -9,7 +9,7 @@
   </a>
   <img src="https://img.shields.io/badge/GITTER-join%20chat-green.svg?style=flat-square" alt="Gitter Chat">
   <br>
-  <strong><a href="//dpc.github.io/hex2d-rs/">Documentation</a></strong>
+  <strong><a href="https://docs.rs/hex2d">Documentation</a></strong>
 </p>
 
 
@@ -23,7 +23,7 @@ A lot of ideas taken from [redbloggames hexagon page][hexagon]
 [hex2d-rs]: http://github.com/dpc/hex2d-rs
 [hex2d-dpcext-rs]: http://github.com/dpc/hex2d-dpcext-rs
 
-Read [Documentation](//dpc.github.io/hex2d-rs/) for details.
+Read [Documentation](https://docs.rs/hex2d) for details.
 
 See [issues](//github.com/dpc/hex2d-rs/issues/) for TODO and BUGs.
 
