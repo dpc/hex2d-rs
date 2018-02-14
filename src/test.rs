@@ -2,7 +2,7 @@
 // See LICENSE file for more information
 
 use super::*;
-use super::Spacing::*;
+use std::convert::Into;
 
 fn with_test_points<F : Fn(Coordinate) -> ()>(f : F) {
     let offs = [-2i32, -1, 0, 1, 2, 1000, -1000, 1001, -1001];
@@ -200,10 +200,10 @@ fn simple_to_pixel() {
         assert_eq!(c.to_pixel(f_spacing), (0f32, 0f32));
     }
 
-    assert_eq!((2i32, -1i32).to_coordinate().to_pixel(f_spacing), (6f32, 0f32));
-    assert_eq!((-2i32, 1i32).to_coordinate().to_pixel(f_spacing), (-6f32, 0f32));
-    assert_eq!((1i32, 1i32).to_coordinate().to_pixel(p_spacing), (0f32, -6f32));
-    assert_eq!((2i32, 2i32).to_coordinate().to_pixel(p_spacing), (0f32, -12f32));
+    assert_eq!(Into::<Coordinate<_>>::into((2i32, -1i32)).to_pixel(f_spacing), (6f32, 0f32));
+    assert_eq!(Into::<Coordinate<_>>::into((-2i32, 1i32)).to_pixel(f_spacing), (-6f32, 0f32));
+    assert_eq!(Into::<Coordinate<_>>::into((1i32, 1i32)).to_pixel(p_spacing), (0f32, -6f32));
+    assert_eq!(Into::<Coordinate<_>>::into((2i32, 2i32)).to_pixel(p_spacing), (0f32, -12f32));
 }
 
 #[test]
