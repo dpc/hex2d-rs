@@ -74,6 +74,7 @@ use num::iter::range_inclusive;
 use std::ops::{Add, Sub, Neg};
 use std::cmp::{max, min};
 use std::convert::{Into, From};
+use std::f64::consts::PI;
 
 pub use Direction::*;
 pub use Angle::*;
@@ -87,6 +88,7 @@ pub trait Integer : num::Signed +
                     num::CheckedAdd +
                     num::ToPrimitive +
                     num::FromPrimitive +
+                    num::NumCast +
                     One + Zero + Copy { }
 
 impl<I> Integer for I
@@ -96,6 +98,7 @@ I : num::Signed +
     num::CheckedAdd +
     num::ToPrimitive +
     num::FromPrimitive +
+    num::NumCast +
     One + Zero + Copy { }
 
 #[cfg(test)]
@@ -189,11 +192,11 @@ impl Into<Direction> for Spin {
 /// Floating point tile size for pixel conversion functions
 #[derive(Copy, Clone, PartialEq, Debug, PartialOrd)]
 #[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
-pub enum Spacing {
+pub enum Spacing<F=f32> {
     /// Hex-grid with an edge on top
-    FlatTop(f32),
+    FlatTop(F),
     /// Hex-grid with a corner on top
-    PointyTop(f32),
+    PointyTop(F),
 }
 
 /// Integer pixel tile size for integer pixel conversion functions
@@ -224,8 +227,9 @@ impl<I : Integer> Coordinate<I> {
     }
 
     /// Round x, y float to nearest hex coordinates
-    pub fn nearest(x : f32, y : f32) -> Coordinate<I> {
-        let z = 0f32 - x - y;
+    pub fn nearest<F: Float>(x : F, y : F) -> Coordinate<I> {
+        let zero: F = Zero::zero();
+        let z: F = zero - x - y;
 
         let mut rx = x.round();
         let mut ry = y.round();
@@ -245,8 +249,8 @@ impl<I : Integer> Coordinate<I> {
         }
 
         Coordinate {
-            x: num::FromPrimitive::from_f32(rx).unwrap(),
-            y: num::FromPrimitive::from_f32(ry).unwrap(),
+            x: I::from(rx).unwrap(),
+            y: I::from(ry).unwrap(),
         }
     }
 
@@ -259,8 +263,9 @@ impl<I : Integer> Coordinate<I> {
     /// Round x, y float to nearest hex coordinates
     ///
     /// Return None, if exactly on the border of two hex coordinates
-    pub fn nearest_lossy(x : f32, y : f32) -> Option<Coordinate<I>> {
-        let z = 0f32 - x - y;
+    pub fn nearest_lossy<F: Float>(x : F, y : F) -> Option<Coordinate<I>> {
+        let zero: F = Zero::zero();
+        let z: F = zero - x - y;
 
         let mut rx = x.round();
         let mut ry = y.round();
@@ -282,13 +287,13 @@ impl<I : Integer> Coordinate<I> {
         let y_diff = (ry - y).abs();
         let z_diff = (rz - z).abs();
 
-        if x_diff + y_diff + z_diff > 0.99 {
+        if x_diff + y_diff + z_diff > F::from(0.99).unwrap() {
             return None;
         }
 
         Some(Coordinate {
-            x: num::FromPrimitive::from_f32(rx).unwrap(),
-            y: num::FromPrimitive::from_f32(ry).unwrap(),
+            x: I::from(rx).unwrap(),
+            y: I::from(ry).unwrap(),
         })
     }
 
@@ -300,16 +305,19 @@ impl<I : Integer> Coordinate<I> {
 
     /// Find the hex containing a pixel. The origin of the pixel coordinates
     /// is the center of the hex at (0,0) in hex coordinates.
-    pub fn from_pixel(x: f32, y: f32, spacing: Spacing) -> Coordinate<I> {
+    pub fn from_pixel<F: Float>(x: F, y: F, spacing: Spacing<F>) -> Coordinate<I> {
+        let f3: F = F::from(3).unwrap();
+        let f2: F = F::from(2).unwrap();
+        let f3s: F = f3.sqrt();
         match spacing {
             Spacing::PointyTop(size) => {
-                let q = (x * 3f32.sqrt()/3f32 - y / 3f32) / size;
-                let r = y * 2f32/3f32 / size;
+                let q = (x * f3s/f3 - y / f3) / size;
+                let r = y * f2/f3 / size;
                 return Coordinate::nearest(q, -r -q);
             },
             Spacing::FlatTop(size) => {
-                let q = x * 2f32/3f32 / size;
-                let r = (-x / 3f32 + 3f32.sqrt()/3f32 * y) / size;
+                let q = x * f2/f3 / size;
+                let r = (-x / f3 + f3s/f3 * y) / size;
                 return Coordinate::nearest(q, -r -q);
             }
         }
@@ -353,17 +361,20 @@ impl<I : Integer> Coordinate<I> {
     /// This function is meant for graphical user interfaces
     /// where resolution is big enough that floating point calculation
     /// make sense.
-    pub fn to_pixel(&self, spacing : Spacing) -> (f32, f32) {
-        let q = self.x.to_f32().unwrap();
-        let r = self.z().to_f32().unwrap();
+    pub fn to_pixel<F: Float>(&self, spacing : Spacing<F>) -> (F, F) {
+        let f3: F = F::from(3).unwrap();
+        let f2: F = F::from(2).unwrap();
+        let f3s: F = f3.sqrt();
+        let q: F = F::from(self.x).unwrap();
+        let r: F = F::from(self.z()).unwrap();
         match spacing {
             FlatTop(s) => (
-                s * 3f32 / 2f32 * q,
-                s * 3f32.sqrt() * (r + q / 2f32)
+                s * f3 / f2 * q,
+                s * f3s * (r + q / f2)
                 ),
             PointyTop(s) => (
-                s * 3f32.sqrt() * (q + r / 2f32),
-                s * 3f32 / 2f32 * r
+                s * f3s * (q + r / f2),
+                s * f3 / f2 * r
                 )
         }
     }
@@ -978,6 +989,23 @@ impl Direction {
     /// This should probably be internal
     pub fn to_int<I : Integer>(&self) -> I {
        num::FromPrimitive::from_u8(*self as u8).unwrap()
+    }
+
+    /// Convert to angle for pointy-topped map, in radians, grows clockwise, 0.0 points up
+    pub fn to_radians_pointy<T: Float>(&self) -> T {
+        T::from(match *self {
+            Direction::YZ => PI * (5.5 / 3.0),
+            Direction::XZ => PI * (0.5 / 3.0),
+            Direction::XY => PI * (1.5 / 3.0),
+            Direction::ZY => PI * (2.5 / 3.0),
+            Direction::ZX => PI * (3.5 / 3.0),
+            Direction::YX => PI * (4.5 / 3.0),
+        }).unwrap()
+    }
+
+    /// Convert to angle for flat-topped map, in radians, grows clockwise, 0.0 points up
+    pub fn to_radians_flat<T: Float>(&self) -> T {
+        self.to_radians_pointy::<T>() + T::from(PI * (0.5 / 3.0)).unwrap()
     }
 }
 
