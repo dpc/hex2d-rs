@@ -54,7 +54,7 @@
 //!
 
 // TODO:
-// Implement Eq between (i, i) and (i, i, i) by using to_coordinate
+// Implement Eq between (i, i) and (i, i, i) by using Into<Coordinate>
 
 #![crate_name = "hex2d"]
 #![crate_type = "lib"]
@@ -73,6 +73,7 @@ use num::{Float, One, Zero};
 use num::iter::range_inclusive;
 use std::ops::{Add, Sub, Neg};
 use std::cmp::{max, min};
+use std::convert::{Into, From};
 use std::f64::consts::PI;
 
 pub use Direction::*;
@@ -113,19 +114,6 @@ pub struct Coordinate<I : Integer = i32> {
     pub y : I,
 }
 
-/// Can be treated as a `Coordinate`
-pub trait ToCoordinate<I: Integer = i32> {
-    /// Convert to `Coordinate` part of this data
-    fn to_coordinate(&self) -> Coordinate<I>;
-}
-
-/// Can be treated as a `Direction`
-pub trait ToDirection {
-    /// Convert to `Angle` part of this data
-    fn to_direction(&self) -> Direction;
-}
-
-
 /// Position on 2d hexagonal grid (Coordinate + Direction)
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
 #[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
@@ -147,7 +135,7 @@ pub struct Position<I : Integer = i32> {
 #[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
 pub enum Direction {
     /// +Y -Z
-    YZ = 0,
+    YZ,
     /// -Z +X
     XZ,
     /// +X -Y
@@ -169,7 +157,7 @@ static ALL_ANGLES : [Angle; 6] = [ Forward, Right, RightBack, Back, LeftBack, Le
 #[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
 pub enum Angle {
     /// 0deg clockwise
-    Forward = 0,
+    Forward,
     /// 60deg clockwise
     Right,
     /// 120deg clockwise
@@ -190,6 +178,15 @@ pub enum Spin {
     CW(Direction),
     /// Counterclockwise
     CCW(Direction),
+}
+
+impl Into<Direction> for Spin {
+    fn into(self) -> Direction {
+        match self {
+            CW(d) => d,
+            CCW(d) => d,
+        }
+    }
 }
 
 /// Floating point tile size for pixel conversion functions
@@ -356,12 +353,6 @@ impl<I : Integer> Coordinate<I> {
 
         let coord = Coordinate{ x: q, y: -q - r };
         (coord, (qo, ro))
-    }
-
-    /// Old name for `to_pixel`
-    #[deprecated(note="use `to_pixel` instead")]
-    pub fn to_pixel_float<F: Float>(&self, spacing : Spacing<F>) -> (F, F) {
-        self.to_pixel(spacing)
     }
 
     /// Convert to pixel coordinates using `spacing`, where the
@@ -828,13 +819,13 @@ impl<I : Integer> Coordinate<I> {
             CCW(d) => (LeftBack, Left, d),
         };
 
-        let mut cur_coord = *self + start_dir.to_coordinate().scale(
+        let mut cur_coord = *self + Into::<Coordinate<_>>::into(start_dir).scale(
             num::FromPrimitive::from_i32(r).unwrap()
-            );
+        );
         let mut cur_dir = start_dir + start_angle;
 
         for _ in 0..6 {
-            let cur_dir_coord = cur_dir.to_coordinate();
+            let cur_dir_coord: Coordinate<_> = cur_dir.into();
             for _ in 0..r {
                 f(cur_coord);
                 cur_coord = cur_coord + cur_dir_coord;
@@ -844,24 +835,18 @@ impl<I : Integer> Coordinate<I> {
     }
 }
 
-impl<I : Integer> ToCoordinate<I> for Coordinate<I> {
-    fn to_coordinate(&self) -> Coordinate<I> {
-        *self
-    }
-}
-
-impl<I : Integer> ToCoordinate<I> for (I, I) {
-    fn to_coordinate(&self) -> Coordinate<I> {
-        let (x, y) = *self;
+impl<I : Integer> From<(I, I)> for Coordinate<I> {
+    fn from(xy: (I, I)) -> Self {
+        let (x, y) = xy;
         Coordinate::new(x, y)
     }
 }
 
-impl<I : Integer, T: ToCoordinate<I>> Add<T> for Coordinate<I> {
+impl<I : Integer, T: Into<Coordinate<I>>> Add<T> for Coordinate<I> {
     type Output = Coordinate<I>;
 
     fn add(self, c : T) -> Coordinate<I> {
-        let c = c.to_coordinate();
+        let c: Coordinate<_> = c.into();
 
         Coordinate {
             x: self.x + c.x,
@@ -870,11 +855,11 @@ impl<I : Integer, T: ToCoordinate<I>> Add<T> for Coordinate<I> {
     }
 }
 
-impl<I : Integer, T: ToCoordinate<I>> Sub<T> for Coordinate<I> {
+impl<I : Integer, T: Into<Coordinate<I>>> Sub<T> for Coordinate<I> {
     type Output = Coordinate<I>;
 
     fn sub(self, c : T) -> Coordinate<I> {
-        let c = c.to_coordinate();
+        let c: Coordinate<_> = c.into();
 
         Coordinate {
             x: self.x - c.x,
@@ -900,16 +885,16 @@ impl<I : Integer> Position<I>
     }
 }
 
-impl<I : Integer> ToDirection for Position<I>
+impl<I : Integer> Into<Direction> for Position<I>
 {
-    fn to_direction(&self) -> Direction {
+    fn into(self) -> Direction {
         self.dir
     }
 }
 
-impl<I : Integer> ToCoordinate<I> for Position<I>
+impl<I : Integer> Into<Coordinate<I>> for Position<I>
 {
-    fn to_coordinate(&self) -> Coordinate<I> {
+    fn into(self) -> Coordinate<I> {
         self.coord
     }
 }
@@ -918,8 +903,6 @@ impl<I : Integer> Add<Coordinate<I>> for Position<I> {
     type Output = Position<I>;
 
     fn add(self, c : Coordinate<I>) -> Position<I> {
-        let c = c.to_coordinate();
-
         Position {
             coord: self.coord + c,
             dir: self.dir,
@@ -932,8 +915,6 @@ impl<I : Integer> Sub<Coordinate<I>> for Position<I>
     type Output = Position<I>;
 
     fn sub(self, c : Coordinate<I>) -> Position<I> {
-        let c = c.to_coordinate();
-
         Position {
             coord: self.coord - c,
             dir: self.dir,
@@ -1028,25 +1009,19 @@ impl Direction {
     }
 }
 
-impl ToDirection for Direction {
-    fn to_direction(&self) -> Direction {
-        *self
-    }
-}
-
-impl<T: ToDirection> Sub<T> for Direction {
+impl<T: Into<Direction>> Sub<T> for Direction {
     type Output = Angle;
 
     fn sub(self, c : T) -> Angle {
-        let c = c.to_direction();
+        let c: Direction = c.into();
 
         Angle::from_int::<i8>(self.to_int::<i8>() - c.to_int::<i8>())
     }
 }
 
-impl<I : Integer> ToCoordinate<I> for Direction {
-    fn to_coordinate(&self) -> Coordinate<I> {
-        let (x, y) = match *self {
+impl<I : Integer> Into<Coordinate<I>> for Direction {
+    fn into(self) -> Coordinate<I> {
+        let (x, y) = match self {
             YZ => (0, 1),
             XZ => (1, 0),
             XY => (1, -1),
@@ -1066,7 +1041,14 @@ impl Neg for Direction {
     type Output = Direction ;
 
     fn neg(self) -> Direction {
-        Direction::from_int::<i8>(self.to_direction().to_int::<i8>() + 3)
+        match self {
+            YZ => ZY,
+            XZ => ZX,
+            XY => YX,
+            ZY => YZ,
+            ZX => XZ,
+            YX => XY,
+        }
     }
 }
 
