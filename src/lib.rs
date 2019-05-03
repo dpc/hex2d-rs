@@ -62,7 +62,6 @@
 #![warn(missing_docs)]
 
 extern crate num;
-extern crate rand;
 #[cfg(feature="serde-serde")]
 extern crate serde;
 #[cfg(feature="serde-serde")]
@@ -180,9 +179,9 @@ pub enum Spin {
     CCW(Direction),
 }
 
-impl Into<Direction> for Spin {
-    fn into(self) -> Direction {
-        match self {
+impl From<Spin> for Direction {
+    fn from(spin: Spin) -> Self {
+        match spin {
             CW(d) => d,
             CCW(d) => d,
         }
@@ -819,7 +818,7 @@ impl<I : Integer> Coordinate<I> {
             CCW(d) => (LeftBack, Left, d),
         };
 
-        let mut cur_coord = *self + Into::<Coordinate<_>>::into(start_dir).scale(
+        let mut cur_coord = *self + Coordinate::<I>::from(start_dir).scale(
             num::FromPrimitive::from_i32(r).unwrap()
         );
         let mut cur_dir = start_dir + start_angle;
@@ -885,17 +884,17 @@ impl<I : Integer> Position<I>
     }
 }
 
-impl<I : Integer> Into<Direction> for Position<I>
+impl<I : Integer> From<Position<I>> for Direction
 {
-    fn into(self) -> Direction {
-        self.dir
+    fn from(pos: Position<I>) -> Self {
+        pos.dir
     }
 }
 
-impl<I : Integer> Into<Coordinate<I>> for Position<I>
+impl<I : Integer> From<Position<I>> for Coordinate<I>
 {
-    fn into(self) -> Coordinate<I> {
-        self.coord
+    fn from(pos: Position<I>) -> Self {
+        pos.coord
     }
 }
 
@@ -1019,9 +1018,9 @@ impl<T: Into<Direction>> Sub<T> for Direction {
     }
 }
 
-impl<I : Integer> Into<Coordinate<I>> for Direction {
-    fn into(self) -> Coordinate<I> {
-        let (x, y) = match self {
+impl<I : Integer> From<Direction> for Coordinate<I> {
+    fn from(dir: Direction) -> Self {
+        let (x, y) = match dir {
             YZ => (0, 1),
             XZ => (1, 0),
             XY => (1, -1),
