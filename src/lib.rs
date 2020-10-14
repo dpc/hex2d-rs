@@ -440,6 +440,25 @@ impl<I : Integer> Coordinate<I> {
         rot_p + center
     }
 
+    pub fn line_to_iter(&self, dest: Coordinate<I>) -> LineTo<I> {
+        let n = self.distance(dest);
+
+        let ax = self.x.to_f32().unwrap();
+        let ay = self.y.to_f32().unwrap();
+        let bx = dest.x.to_f32().unwrap();
+        let by = dest.y.to_f32().unwrap();
+        LineTo {
+            n,
+            ax,
+            ay,
+            bx,
+            by,
+
+            i: Zero::zero(),
+            start: *self,
+        }
+    }
+
     /// Execute `f` for each coordinate in straight line from `self` to `dest`
     pub fn for_each_in_line_to<F>(&self, dest : Coordinate<I>, mut f : F)
         where
@@ -831,6 +850,52 @@ impl<I : Integer> Coordinate<I> {
             }
             cur_dir = cur_dir + step_angle;
         }
+    }
+}
+
+pub struct LineTo<I: Integer> {
+    start: Coordinate<I>,
+    ax: f32,
+    ay: f32,
+    bx: f32,
+    by: f32,
+    n: I,
+    i: I,
+}
+
+impl<
+        I: num::Integer
+            + num::Signed
+            + std::marker::Copy
+            + num::NumCast
+            + num::FromPrimitive
+            + num::CheckedAdd
+            + std::marker::Copy
+            + std::ops::AddAssign,
+    > Iterator for LineTo<I>
+{
+    type Item = Coordinate<I>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.n == Zero::zero() {
+            if self.i == Zero::zero() {
+                self.i += One::one();
+                return Some(self.start);
+            } else {
+                return None;
+            }
+        }
+
+        if self.i > self.n {
+            return None;
+        }
+
+        let d = self.i.to_f32().unwrap() / self.n.to_f32().unwrap();
+        let x = self.ax + (self.bx - self.ax) * d;
+        let y = self.ay + (self.by - self.ay) * d;
+        let c = Coordinate::nearest(x, y);
+        self.i += One::one();
+        Some(c)
     }
 }
 
