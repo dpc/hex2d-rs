@@ -14,6 +14,21 @@ fn with_test_points<F : Fn(Coordinate) -> ()>(f : F) {
     }
 }
 
+fn with_pair_test_points<F: Fn(Coordinate, Coordinate) -> ()>(f: F) {
+    let offs = [-2i32, -1, 0, 1, 2, 1000, -1000, 1001, -1001];
+    for &ax in offs.iter() {
+        for &ay in offs.iter() {
+            let a = Coordinate::new(ax, ay);
+            for &bx in offs.iter() {
+                for &by in offs.iter() {
+                    let b = Coordinate::new(bx, by);
+                    f(a, b)
+                }
+            }
+        }
+    }
+}
+
 #[test]
 fn coord_add_and_sub() {
     let a = Coordinate::new(-1, 2);
@@ -340,3 +355,9 @@ fn simple_line_to() {
     });
 }
 
+#[test]
+fn line_to_iter() {
+    with_pair_test_points(|a: Coordinate, b: Coordinate| {
+        assert_eq!(a.line_to(b), a.line_to_iter(b).collect::<Vec<_>>());
+    });
+}
