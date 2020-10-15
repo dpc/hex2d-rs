@@ -458,14 +458,21 @@ impl<I : Integer> Coordinate<I> {
         }
     }
 
+    /// Iterator over each coordinate in straight line from `self` to `dest`
     pub fn line_to_iter(&self, dest: Coordinate<I>) -> LineTo<I> {
         LineTo(self.line_to_iter_gen(dest))
     }
 
+    /// Iterator over each coordinate in straight line from `self` to `dest`
+    ///
+    /// Skip points on the border of two tiles
     pub fn line_to_lossy_iter(&self, dest: Coordinate<I>) -> LineToLossy<I> {
         LineToLossy(self.line_to_iter_gen(dest))
     }
 
+    /// Iterator over each coordinate in straight line from `self` to `dest`
+    ///
+    /// On edge condition the pair contains different members, otherwise it's the same.
     pub fn line_to_with_edge_detection_iter(&self, dest: Coordinate<I>) -> LineToWithEdgeDetection<I> {
         LineToWithEdgeDetection(self.line_to_iter_gen(dest))
     }
