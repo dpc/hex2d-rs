@@ -359,5 +359,6 @@ fn simple_line_to() {
 fn line_to_iter() {
     with_pair_test_points(|a: Coordinate, b: Coordinate| {
         assert_eq!(a.line_to(b), a.line_to_iter(b).collect::<Vec<_>>());
+        assert_eq!(a.line_to_lossy(b), a.line_to_lossy_iter(b).collect::<Vec<_>>());
     });
 }

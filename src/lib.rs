@@ -938,7 +938,14 @@ impl<
 {
     type Item = Coordinate<I>;
     fn next(&mut self) -> Option<Self::Item> {
-        self.0.next().and_then(|(x, y)| Coordinate::nearest_lossy(x, y))
+        loop {
+            let c = self.0.next().map(|(x, y)| Coordinate::nearest_lossy(x, y));
+            match c {
+                Some(c@Some(_)) => return c,
+                Some(None) => continue,
+                None => return None,
+            }
+        }
     }
 }
 impl<I : Integer> From<(I, I)> for Coordinate<I> {
