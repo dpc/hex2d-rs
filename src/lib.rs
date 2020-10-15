@@ -462,6 +462,10 @@ impl<I : Integer> Coordinate<I> {
         LineTo(self.line_to_iter_gen(dest))
     }
 
+    pub fn line_to_lossy_iter(&self, dest: Coordinate<I>) -> LineToLossy<I> {
+        LineToLossy(self.line_to_iter_gen(dest))
+    }
+
     /// Execute `f` for each coordinate in straight line from `self` to `dest`
     pub fn for_each_in_line_to<F>(&self, dest : Coordinate<I>, mut f : F)
         where
@@ -919,6 +923,24 @@ impl<
     }
 }
 
+pub struct LineToLossy<I: Integer> (LineToGen<I>);
+
+impl<
+        I: num::Integer
+            + num::Signed
+            + std::marker::Copy
+            + num::NumCast
+            + num::FromPrimitive
+            + num::CheckedAdd
+            + std::marker::Copy
+            + std::ops::AddAssign,
+    > Iterator for LineToLossy<I>
+{
+    type Item = Coordinate<I>;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next().and_then(|(x, y)| Coordinate::nearest_lossy(x, y))
+    }
+}
 impl<I : Integer> From<(I, I)> for Coordinate<I> {
     fn from(xy: (I, I)) -> Self {
         let (x, y) = xy;
