@@ -440,14 +440,14 @@ impl<I : Integer> Coordinate<I> {
         rot_p + center
     }
 
-    pub fn line_to_iter(&self, dest: Coordinate<I>) -> LineTo<I> {
+    fn line_to_iter_gen(&self, dest: Coordinate<I>) -> LineToGen<I> {
         let n = self.distance(dest);
 
         let ax = self.x.to_f32().unwrap();
         let ay = self.y.to_f32().unwrap();
         let bx = dest.x.to_f32().unwrap();
         let by = dest.y.to_f32().unwrap();
-        LineTo {
+        LineToGen {
             n,
             ax,
             ay,
@@ -455,8 +455,11 @@ impl<I : Integer> Coordinate<I> {
             by,
 
             i: Zero::zero(),
-            start: *self,
         }
+    }
+
+    pub fn line_to_iter(&self, dest: Coordinate<I>) -> LineTo<I> {
+        LineTo(self.line_to_iter_gen(dest))
     }
 
     /// Execute `f` for each coordinate in straight line from `self` to `dest`
@@ -853,8 +856,7 @@ impl<I : Integer> Coordinate<I> {
     }
 }
 
-pub struct LineTo<I: Integer> {
-    start: Coordinate<I>,
+struct LineToGen<I: Integer> {
     ax: f32,
     ay: f32,
     bx: f32,
@@ -872,15 +874,15 @@ impl<
             + num::CheckedAdd
             + std::marker::Copy
             + std::ops::AddAssign,
-    > Iterator for LineTo<I>
+    > Iterator for LineToGen<I>
 {
-    type Item = Coordinate<I>;
+    type Item = (f32, f32);
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.n == Zero::zero() {
             if self.i == Zero::zero() {
                 self.i += One::one();
-                return Some(self.start);
+                return Some((self.ax, self.ay));
             } else {
                 return None;
             }
@@ -893,9 +895,27 @@ impl<
         let d = self.i.to_f32().unwrap() / self.n.to_f32().unwrap();
         let x = self.ax + (self.bx - self.ax) * d;
         let y = self.ay + (self.by - self.ay) * d;
-        let c = Coordinate::nearest(x, y);
         self.i += One::one();
-        Some(c)
+        Some((x, y))
+    }
+}
+
+pub struct LineTo<I: Integer> (LineToGen<I>);
+
+impl<
+        I: num::Integer
+            + num::Signed
+            + std::marker::Copy
+            + num::NumCast
+            + num::FromPrimitive
+            + num::CheckedAdd
+            + std::marker::Copy
+            + std::ops::AddAssign,
+    > Iterator for LineTo<I>
+{
+    type Item = Coordinate<I>;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next().map(|(x, y)| Coordinate::nearest(x, y))
     }
 }
 
