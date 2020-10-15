@@ -860,6 +860,8 @@ impl<I : Integer> Coordinate<I> {
     }
 }
 
+#[derive(Clone, PartialEq, Debug, PartialOrd)]
+#[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
 struct LineToGen<I: Integer> {
     ax: f32,
     ay: f32,
@@ -904,6 +906,8 @@ impl<
     }
 }
 
+#[derive(Clone, PartialEq, Debug, PartialOrd)]
+#[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
 pub struct LineTo<I: Integer> (LineToGen<I>);
 
 impl<
@@ -923,6 +927,8 @@ impl<
     }
 }
 
+#[derive(Clone, PartialEq, Debug, PartialOrd)]
+#[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
 pub struct LineToLossy<I: Integer> (LineToGen<I>);
 
 impl<
