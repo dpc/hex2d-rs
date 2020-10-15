@@ -466,6 +466,10 @@ impl<I : Integer> Coordinate<I> {
         LineToLossy(self.line_to_iter_gen(dest))
     }
 
+    pub fn line_to_with_edge_detection_iter(&self, dest: Coordinate<I>) -> LineToWithEdgeDetection<I> {
+        LineToWithEdgeDetection(self.line_to_iter_gen(dest))
+    }
+
     /// Execute `f` for each coordinate in straight line from `self` to `dest`
     pub fn for_each_in_line_to<F>(&self, dest : Coordinate<I>, mut f : F)
         where
@@ -954,6 +958,31 @@ impl<
         }
     }
 }
+
+#[derive(Clone, PartialEq, Debug, PartialOrd)]
+#[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
+pub struct LineToWithEdgeDetection<I: Integer> (LineToGen<I>);
+
+impl<
+        I: num::Integer
+            + num::Signed
+            + std::marker::Copy
+            + num::NumCast
+            + num::FromPrimitive
+            + num::CheckedAdd
+            + std::marker::Copy
+            + std::ops::AddAssign,
+    > Iterator for LineToWithEdgeDetection<I>
+{
+    type Item = (Coordinate<I>, Coordinate<I>);
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next().map(|(x, y)| (
+            Coordinate::nearest(x + 0.000001, y + 0.000001),
+            Coordinate::nearest(x - 0.000001, y - 0.000001)
+        ))
+    }
+}
+
 impl<I : Integer> From<(I, I)> for Coordinate<I> {
     fn from(xy: (I, I)) -> Self {
         let (x, y) = xy;
