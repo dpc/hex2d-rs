@@ -873,6 +873,7 @@ impl<I : Integer> Coordinate<I> {
 
 #[derive(Clone, PartialEq, Debug, PartialOrd)]
 #[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
+/// Genertic iterator over a line return x, y values
 struct LineToGen<I: Integer> {
     ax: f32,
     ay: f32,
@@ -919,6 +920,7 @@ impl<
 
 #[derive(Clone, PartialEq, Debug, PartialOrd)]
 #[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
+/// An iterator over an a line of Coordinates
 pub struct LineTo<I: Integer> (LineToGen<I>);
 
 impl<
@@ -940,6 +942,7 @@ impl<
 
 #[derive(Clone, PartialEq, Debug, PartialOrd)]
 #[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
+/// An iterator over an a line of Coordinates, using a lossy algorithm
 pub struct LineToLossy<I: Integer> (LineToGen<I>);
 
 impl<
@@ -968,6 +971,7 @@ impl<
 
 #[derive(Clone, PartialEq, Debug, PartialOrd)]
 #[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
+/// An iterator over an a line of Coordinates, with edge detection
 pub struct LineToWithEdgeDetection<I: Integer> (LineToGen<I>);
 
 impl<
