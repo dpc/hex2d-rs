@@ -776,6 +776,16 @@ impl<I : Integer> Coordinate<I> {
             / num::FromPrimitive::from_i8(2).unwrap()
     }
 
+    /// An iterator over all coordinates in radius `r`
+    pub fn range_iter(&self, r : I) -> Range<I> {
+        Range{
+            source: *self,
+            x: -r,
+            y: max(-r, -(-r)-r),
+            r,
+        }
+    }
+
     /// All coordinates in radius `r`
     pub fn range(&self, r : I) -> Vec<Coordinate<I>>
     where
@@ -870,6 +880,48 @@ impl<I : Integer> Coordinate<I> {
         }
     }
 }
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
+#[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
+/// Iterator over an range
+pub struct Range<I: Integer> {
+    source: Coordinate<I>,
+    x: I,
+    y: I,
+    r: I,
+}
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    > Iterator for Range<I>
+{
+    type Item = Coordinate<I>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.y > min(self.r, -self.x+self.r) {
+            self.x += One::one();
+            if self.x > self.r {
+                return None
+            }
+            self.y = max(-self.r, -self.x-self.r);
+        }
+
+        let ret = Some(Coordinate{
+            x: self.source.x + self.x,
+            y: self.source.y + self.y,
+        });
+        self.y += One::one();
+        ret
+    }
+}
+
 
 #[derive(Clone, PartialEq, Debug, PartialOrd)]
 #[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
