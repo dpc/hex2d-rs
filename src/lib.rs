@@ -879,6 +879,90 @@ impl<I : Integer> Coordinate<I> {
             cur_dir = cur_dir + step_angle;
         }
     }
+
+    /// Iterator over each coordinate in a ring
+    ///
+    /// See `ring` for a ring description.
+    pub fn ring_iter(&self, r : i32, s : Spin) -> Ring<I> {
+
+        let (start_angle, step_angle, start_dir) = match s {
+            CW(d) => (RightBack, Right, d),
+            CCW(d) => (LeftBack, Left, d),
+        };
+
+        let cur_coord = *self + Coordinate::<I>::from(start_dir).scale(
+            num::FromPrimitive::from_i32(r).unwrap()
+        );
+        let cur_dir = start_dir + start_angle;
+
+
+        Ring {
+            source: *self,
+            cur_coord,
+            cur_dir,
+            step_angle,
+            r,
+            ii: 0,
+            jj: 0,
+            fuse: false,
+        }
+    }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
+#[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
+/// Iterator over a ring
+pub struct Ring<I: Integer> {
+    source: Coordinate<I>,
+    cur_coord: Coordinate<I>,
+    cur_dir: Direction,
+    step_angle: Angle,
+    r: i32,
+    ii: i32,
+    jj: i32,
+    fuse: bool,
+}
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    > Iterator for Ring<I>
+{
+    type Item = Coordinate<I>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.fuse {
+            return None;
+        }
+        if self.r.is_zero() {
+            self.fuse = true;
+            return Some(self.source)
+        }
+
+        if self.jj >= self.r {
+            self.ii += 1;
+            if self.ii >= 6 {
+                self.fuse = true;
+                return None
+            }
+            self.cur_dir = self.cur_dir + self.step_angle;
+            self.jj = 0;
+        }
+        self.jj += 1;
+
+        let ret = Some(self.cur_coord);
+        let cur_dir_coord: Coordinate<_> = self.cur_dir.into();
+        self.cur_coord = self.cur_coord + cur_dir_coord;
+
+        ret
+
+    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
