@@ -363,3 +363,12 @@ fn line_to_iter() {
         assert_eq!(a.line_to_with_edge_detection(b), a.line_to_with_edge_detection_iter(b).collect::<Vec<_>>());
     });
 }
+
+#[test]
+fn range_iter() {
+    with_test_points(|c : Coordinate| {
+        for i in &[0, 1, 2, 4, 10, 40]{
+            assert_eq!(c.range(*i), c.range_iter(*i).collect::<Vec<_>>());
+        }
+    });
+}
