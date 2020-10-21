@@ -72,7 +72,8 @@ use num::{Float, One, Zero};
 use num::iter::range_inclusive;
 use std::ops::{Add, Sub, Neg};
 use std::cmp::{max, min};
-use std::convert::{Into, From, TryInto};
+use std::convert::{Into, From, TryInto, TryFrom};
+use std::fmt::Debug;
 use std::f64::consts::PI;
 use std::iter;
 
@@ -1068,6 +1069,9 @@ impl<
             + std::marker::Copy
             + std::ops::AddAssign,
     > Iterator for LineToGen<I>
+where
+    usize: TryFrom<I>,
+    <usize as TryFrom<I>>::Error: Debug,
 {
     type Item = (f32, f32);
 
@@ -1091,6 +1095,13 @@ impl<
         self.i += One::one();
         Some((x, y))
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let origin = Coordinate::<I>::nearest(self.ax, self.ay);
+        let dest = Coordinate::nearest(self.bx, self.by);
+        let total_size = origin.distance(dest) + One::one();
+        (0, Some(total_size.try_into().unwrap()))
+    }
 }
 
 #[derive(Clone, PartialEq, Debug, PartialOrd)]
@@ -1108,6 +1119,9 @@ impl<
             + std::marker::Copy
             + std::ops::AddAssign,
     > Iterator for LineTo<I>
+where
+    usize: std::convert::TryFrom<I>,
+    <usize as TryFrom<I>>::Error: Debug,
 {
     type Item = Coordinate<I>;
     fn next(&mut self) -> Option<Self::Item> {
@@ -1134,6 +1148,9 @@ impl<
             + std::marker::Copy
             + std::ops::AddAssign,
     > Iterator for LineToLossy<I>
+where
+    usize: std::convert::TryFrom<I>,
+    <usize as TryFrom<I>>::Error: Debug,
 {
     type Item = Coordinate<I>;
     fn next(&mut self) -> Option<Self::Item> {
@@ -1167,6 +1184,9 @@ impl<
             + std::marker::Copy
             + std::ops::AddAssign,
     > Iterator for LineToWithEdgeDetection<I>
+where
+    usize: std::convert::TryFrom<I>,
+    <usize as TryFrom<I>>::Error: Debug,
 {
     type Item = (Coordinate<I>, Coordinate<I>);
     fn next(&mut self) -> Option<Self::Item> {
