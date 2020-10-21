@@ -368,7 +368,10 @@ fn line_to_iter() {
 fn range_iter() {
     with_test_points(|c : Coordinate| {
         for i in &[0, 1, 2, 4, 10, 40]{
-            assert_eq!(c.range(*i), c.range_iter(*i).collect::<Vec<_>>());
+            let original = c.range(*i);
+            let iter = c.range_iter(*i);
+            assert_eq!(original.len(), iter.size_hint().1.unwrap());
+            assert_eq!(original, iter.collect::<Vec<_>>());
         }
     });
 }
@@ -379,7 +382,10 @@ fn ring_iter() {
         for i in &[0, 1, 2, 4, 10, 40]{
             for direction in &ALL_DIRECTIONS {
                 for spin in &[CW(*direction), CCW(*direction)] {
-                    assert_eq!(c.ring(*i, *spin), c.ring_iter(*i, *spin).collect::<Vec<_>>());
+                    let original = c.ring(*i, *spin);
+                    let iter = c.ring_iter(*i, *spin);
+                    assert_eq!(original.len(), iter.size_hint().1.unwrap());
+                    assert_eq!(original, iter.collect::<Vec<_>>());
                 }
             }
         }
