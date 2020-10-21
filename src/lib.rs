@@ -72,7 +72,7 @@ use num::{Float, One, Zero};
 use num::iter::range_inclusive;
 use std::ops::{Add, Sub, Neg};
 use std::cmp::{max, min};
-use std::convert::{Into, From};
+use std::convert::{Into, From, TryInto};
 use std::f64::consts::PI;
 use std::iter;
 
@@ -966,7 +966,12 @@ impl<
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (0, Some(if self.r == 0 { 1 } else if self.r < 0 { (self.r*-6) as usize } else { (self.r*6) as usize }))
+        if self.fuse {
+            return (0, Some(0));
+        }
+        let total_size: usize = if self.r == 0 { 1 } else if self.r < 0 { (self.r*-6) as usize } else { (self.r*6) as usize };
+        let past: usize = max(0, (self.jj+self.ii*self.r).try_into().unwrap());
+        (total_size-past , Some(total_size-past))
     }
 }
 
@@ -980,6 +985,17 @@ impl<
         + std::marker::Copy
         + std::ops::AddAssign,
     > iter::FusedIterator for Ring<I> {}
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    > iter::ExactSizeIterator for Ring<I> {}
 
 
 
