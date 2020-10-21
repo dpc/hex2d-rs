@@ -402,7 +402,7 @@ fn line_to_with_edge_detection_iter() {
 fn range_iter() {
     with_test_points(|c : Coordinate| {
         for i in &[0, 1, 2, 4, 10, 40]{
-            test_iter(c.range(*i), c.range_iter(*i));
+            test_iter_exact(c.range(*i), c.range_iter(*i));
         }
     });
 }
