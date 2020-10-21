@@ -1022,6 +1022,11 @@ impl<
         self.y += One::one();
         ret
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let rc = (if self.r < Zero::zero() { I::one()-self.r } else { self.r }).to_usize().unwrap();
+        (0, Some(3*(rc+rc*rc)+1))
+    }
 }
 
 
