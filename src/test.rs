@@ -355,13 +355,15 @@ fn simple_line_to() {
     });
 }
 
+fn test_iter<T: std::cmp::PartialEq + std::fmt::Debug>(original: Vec<T>, iter: impl Iterator<Item=T>) {
+    assert_eq!(original.len(), iter.size_hint().1.unwrap());
+    assert_eq!(original, iter.collect::<Vec<_>>());
+}
+
 #[test]
 fn line_to_iter() {
     with_pair_test_points(|a: Coordinate, b: Coordinate| {
-        let original = a.line_to(b);
-        let iter = a.line_to_iter(b);
-        assert_eq!(original.len(), iter.size_hint().1.unwrap());
-        assert_eq!(original, iter.collect::<Vec<_>>());
+        test_iter(a.line_to(b), a.line_to_iter(b));
     });
 }
 
@@ -378,10 +380,7 @@ fn line_to_lossy_iter() {
 #[test]
 fn line_to_with_edge_detection_iter() {
     with_pair_test_points(|a: Coordinate, b: Coordinate| {
-        let original = a.line_to_with_edge_detection(b);
-        let iter = a.line_to_with_edge_detection_iter(b);
-        assert_eq!(original.len(), iter.size_hint().1.unwrap());
-        assert_eq!(original, iter.collect::<Vec<_>>());
+        test_iter(a.line_to_with_edge_detection(b), a.line_to_with_edge_detection_iter(b));
     });
 }
 
@@ -389,10 +388,7 @@ fn line_to_with_edge_detection_iter() {
 fn range_iter() {
     with_test_points(|c : Coordinate| {
         for i in &[0, 1, 2, 4, 10, 40]{
-            let original = c.range(*i);
-            let iter = c.range_iter(*i);
-            assert_eq!(original.len(), iter.size_hint().1.unwrap());
-            assert_eq!(original, iter.collect::<Vec<_>>());
+            test_iter(c.range(*i), c.range_iter(*i));
         }
     });
 }
