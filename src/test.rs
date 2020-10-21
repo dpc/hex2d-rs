@@ -358,21 +358,30 @@ fn simple_line_to() {
 #[test]
 fn line_to_iter() {
     with_pair_test_points(|a: Coordinate, b: Coordinate| {
-        assert_eq!(a.line_to(b), a.line_to_iter(b).collect::<Vec<_>>());
+        let original = a.line_to(b);
+        let iter = a.line_to_iter(b);
+        assert_eq!(original.len(), iter.size_hint().1.unwrap());
+        assert_eq!(original, iter.collect::<Vec<_>>());
     });
 }
 
 #[test]
 fn line_to_lossy_iter() {
     with_pair_test_points(|a: Coordinate, b: Coordinate| {
-        assert_eq!(a.line_to_lossy(b), a.line_to_lossy_iter(b).collect::<Vec<_>>());
+        let original = a.line_to_lossy(b);
+        let iter = a.line_to_lossy_iter(b);
+        assert!(original.len() <= iter.size_hint().1.unwrap());
+        assert_eq!(original, iter.collect::<Vec<_>>());
     });
 }
 
 #[test]
 fn line_to_with_edge_detection_iter() {
     with_pair_test_points(|a: Coordinate, b: Coordinate| {
-        assert_eq!(a.line_to_with_edge_detection(b), a.line_to_with_edge_detection_iter(b).collect::<Vec<_>>());
+        let original = a.line_to_with_edge_detection(b);
+        let iter = a.line_to_with_edge_detection_iter(b);
+        assert_eq!(original.len(), iter.size_hint().1.unwrap());
+        assert_eq!(original, iter.collect::<Vec<_>>());
     });
 }
 
