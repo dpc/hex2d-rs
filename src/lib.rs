@@ -72,7 +72,7 @@ use num::{Float, One, Zero};
 use num::iter::range_inclusive;
 use std::ops::{Add, Sub, Neg};
 use std::cmp::{max, min};
-use std::convert::{Into, From, TryInto, TryFrom};
+use std::convert::{Into, From, TryInto};
 use std::fmt::Debug;
 use std::f64::consts::PI;
 use std::iter;
@@ -1083,13 +1083,11 @@ impl<
             + std::marker::Copy
             + num::NumCast
             + num::FromPrimitive
+            + num::ToPrimitive
             + num::CheckedAdd
             + std::marker::Copy
             + std::ops::AddAssign,
     > Iterator for LineToGen<I>
-where
-    usize: TryFrom<I>,
-    <usize as TryFrom<I>>::Error: Debug,
 {
     type Item = (f32, f32);
 
@@ -1119,7 +1117,7 @@ where
         let dest = Coordinate::nearest(self.bx, self.by);
         let total_size = origin.distance(dest) + One::one();
         let len = total_size-self.i;
-        let len = len.try_into().unwrap();
+        let len = len.to_usize().unwrap();
         (len, Some(len))
     }
 }
@@ -1130,14 +1128,12 @@ impl<
         + std::marker::Copy
         + num::NumCast
         + num::FromPrimitive
+        + num::ToPrimitive
         + num::CheckedAdd
         + std::marker::Copy
         + std::ops::AddAssign,
     >
     iter::ExactSizeIterator for LineToGen<I>
-where
-    usize: TryFrom<I>,
-<usize as TryFrom<I>>::Error: Debug,
 {}
 
 #[derive(Clone, PartialEq, Debug, PartialOrd)]
@@ -1151,13 +1147,11 @@ impl<
             + std::marker::Copy
             + num::NumCast
             + num::FromPrimitive
+            + num::ToPrimitive
             + num::CheckedAdd
             + std::marker::Copy
             + std::ops::AddAssign,
     > Iterator for LineTo<I>
-where
-    usize: std::convert::TryFrom<I>,
-    <usize as TryFrom<I>>::Error: Debug,
 {
     type Item = Coordinate<I>;
     fn next(&mut self) -> Option<Self::Item> {
@@ -1175,14 +1169,12 @@ impl<
         + std::marker::Copy
         + num::NumCast
         + num::FromPrimitive
+        + num::ToPrimitive
         + num::CheckedAdd
         + std::marker::Copy
         + std::ops::AddAssign,
     >
     iter::ExactSizeIterator for LineTo<I>
-where
-    usize: TryFrom<I>,
-<usize as TryFrom<I>>::Error: Debug,
 {}
 
 #[derive(Clone, PartialEq, Debug, PartialOrd)]
@@ -1196,13 +1188,11 @@ impl<
             + std::marker::Copy
             + num::NumCast
             + num::FromPrimitive
+            + num::ToPrimitive
             + num::CheckedAdd
             + std::marker::Copy
             + std::ops::AddAssign,
     > Iterator for LineToLossy<I>
-where
-    usize: std::convert::TryFrom<I>,
-    <usize as TryFrom<I>>::Error: Debug,
 {
     type Item = Coordinate<I>;
     fn next(&mut self) -> Option<Self::Item> {
@@ -1232,13 +1222,11 @@ impl<
             + std::marker::Copy
             + num::NumCast
             + num::FromPrimitive
+            + num::ToPrimitive
             + num::CheckedAdd
             + std::marker::Copy
             + std::ops::AddAssign,
     > Iterator for LineToWithEdgeDetection<I>
-where
-    usize: std::convert::TryFrom<I>,
-    <usize as TryFrom<I>>::Error: Debug,
 {
     type Item = (Coordinate<I>, Coordinate<I>);
     fn next(&mut self) -> Option<Self::Item> {
@@ -1259,14 +1247,12 @@ impl<
         + std::marker::Copy
         + num::NumCast
         + num::FromPrimitive
+        + num::ToPrimitive
         + num::CheckedAdd
         + std::marker::Copy
         + std::ops::AddAssign,
     >
     iter::ExactSizeIterator for LineToWithEdgeDetection<I>
-where
-    usize: TryFrom<I>,
-<usize as TryFrom<I>>::Error: Debug,
 {}
 
 impl<I : Integer> From<(I, I)> for Coordinate<I> {
