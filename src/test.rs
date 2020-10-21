@@ -355,15 +355,29 @@ fn simple_line_to() {
     });
 }
 
+// Tests an iterator with size_hint against a Vec
 fn test_iter<T: std::cmp::PartialEq + std::fmt::Debug>(original: Vec<T>, iter: impl Iterator<Item=T>) {
     assert_eq!(original.len(), iter.size_hint().1.unwrap());
     assert_eq!(original, iter.collect::<Vec<_>>());
 }
 
+// Tests an ExactSizeIterator against a Vec
+fn test_iter_exact<T: std::cmp::PartialEq + std::fmt::Debug>(original: Vec<T>, mut iter: impl ExactSizeIterator<Item=T>) {
+    assert_eq!(original.len(), iter.len());
+    let mut vec = Vec::new();
+    let mut count = 0;
+    while let Some(el) = iter.next() {
+        count += 1;
+        assert_eq!(original.len(), iter.len()+count);
+        vec.push(el);
+    }
+    assert_eq!(original, vec);
+}
+
 #[test]
 fn line_to_iter() {
     with_pair_test_points(|a: Coordinate, b: Coordinate| {
-        test_iter(a.line_to(b), a.line_to_iter(b));
+        test_iter_exact(a.line_to(b), a.line_to_iter(b));
     });
 }
 
@@ -380,7 +394,7 @@ fn line_to_lossy_iter() {
 #[test]
 fn line_to_with_edge_detection_iter() {
     with_pair_test_points(|a: Coordinate, b: Coordinate| {
-        test_iter(a.line_to_with_edge_detection(b), a.line_to_with_edge_detection_iter(b));
+        test_iter_exact(a.line_to_with_edge_detection(b), a.line_to_with_edge_detection_iter(b));
     });
 }
 
@@ -399,17 +413,7 @@ fn ring_iter() {
         for i in &[0, 1, 2, 4, 10, 40]{
             for direction in &ALL_DIRECTIONS {
                 for spin in &[CW(*direction), CCW(*direction)] {
-                    let original = c.ring(*i, *spin);
-                    let mut iter = c.ring_iter(*i, *spin);
-                    assert_eq!(original.len(), iter.len());
-                    let mut vec = Vec::new();
-                    let mut count = 0;
-                    while let Some(el) = iter.next() {
-                        count += 1;
-                        assert_eq!(original.len(), iter.len()+count);
-                        vec.push(el);
-                    }
-                    assert_eq!(original, vec);
+                    test_iter_exact(c.ring(*i, *spin), c.ring_iter(*i, *spin));
                 }
             }
         }
