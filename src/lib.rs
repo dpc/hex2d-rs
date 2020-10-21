@@ -1041,10 +1041,30 @@ impl<
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
+        let mut counter: usize = Zero::zero();
+        for x in range_inclusive(-self.r, self.r) {
+            for _ in range_inclusive(max(-self.r, -x-self.r), min(self.r, -x+self.r)) {
+                counter += 1;
+            }
+        }
         let rc = (if self.r < Zero::zero() { I::one()-self.r } else { self.r }).to_usize().unwrap();
-        (0, Some(3*(rc+rc*rc)+1))
+        let total_size = 3*(rc+rc*rc)+1;
+        (total_size-counter, Some(total_size-counter))
     }
 }
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    >
+    iter::ExactSizeIterator for Range<I>
+{}
 
 
 #[derive(Clone, PartialEq, Debug, PartialOrd)]
