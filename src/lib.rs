@@ -1100,9 +1100,27 @@ where
         let origin = Coordinate::<I>::nearest(self.ax, self.ay);
         let dest = Coordinate::nearest(self.bx, self.by);
         let total_size = origin.distance(dest) + One::one();
-        (0, Some(total_size.try_into().unwrap()))
+        let len = total_size-self.i;
+        let len = len.try_into().unwrap();
+        (len, Some(len))
     }
 }
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    >
+    iter::ExactSizeIterator for LineToGen<I>
+where
+    usize: TryFrom<I>,
+<usize as TryFrom<I>>::Error: Debug,
+{}
 
 #[derive(Clone, PartialEq, Debug, PartialOrd)]
 #[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
@@ -1132,6 +1150,22 @@ where
         self.0.size_hint()
     }
 }
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    >
+    iter::ExactSizeIterator for LineTo<I>
+where
+    usize: TryFrom<I>,
+<usize as TryFrom<I>>::Error: Debug,
+{}
 
 #[derive(Clone, PartialEq, Debug, PartialOrd)]
 #[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
@@ -1200,6 +1234,22 @@ where
         self.0.size_hint()
     }
 }
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    >
+    iter::ExactSizeIterator for LineToWithEdgeDetection<I>
+where
+    usize: TryFrom<I>,
+<usize as TryFrom<I>>::Error: Debug,
+{}
 
 impl<I : Integer> From<(I, I)> for Coordinate<I> {
     fn from(xy: (I, I)) -> Self {
