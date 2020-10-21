@@ -1113,6 +1113,10 @@ impl<
     fn next(&mut self) -> Option<Self::Item> {
         self.0.next().map(|(x, y)| Coordinate::nearest(x, y))
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.0.size_hint()
+    }
 }
 
 #[derive(Clone, PartialEq, Debug, PartialOrd)]
@@ -1142,6 +1146,10 @@ impl<
             }
         }
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (0, self.0.size_hint().1)
+    }
 }
 
 #[derive(Clone, PartialEq, Debug, PartialOrd)]
@@ -1166,6 +1174,10 @@ impl<
             Coordinate::nearest(x + 0.000001, y + 0.000001),
             Coordinate::nearest(x - 0.000001, y - 0.000001)
         ))
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.0.size_hint()
     }
 }
 
