@@ -74,6 +74,7 @@ use std::ops::{Add, Sub, Neg};
 use std::cmp::{max, min};
 use std::convert::{Into, From};
 use std::f64::consts::PI;
+use std::iter;
 
 pub use Direction::*;
 pub use Angle::*;
@@ -964,6 +965,19 @@ impl<
 
     }
 }
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    > iter::FusedIterator for Ring<I> {}
+
+
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
 #[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
