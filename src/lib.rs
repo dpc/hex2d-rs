@@ -1207,7 +1207,7 @@ impl<
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (0, self.0.size_hint().1)
+        (self.0.size_hint().0/2, self.0.size_hint().1)
     }
 }
 
