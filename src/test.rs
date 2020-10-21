@@ -356,9 +356,19 @@ fn simple_line_to() {
 }
 
 // Tests an iterator with size_hint against a Vec
-fn test_iter<T: std::cmp::PartialEq + std::fmt::Debug>(original: Vec<T>, iter: impl Iterator<Item=T>) {
-    assert_eq!(original.len(), iter.size_hint().1.unwrap());
-    assert_eq!(original, iter.collect::<Vec<_>>());
+fn test_iter<T: std::cmp::PartialEq + std::fmt::Debug>(original: Vec<T>, mut iter: impl Iterator<Item=T>) {
+    assert!(original.len() <= iter.size_hint().1.unwrap());
+    assert!(original.len() >= iter.size_hint().0);
+
+    let mut vec = Vec::new();
+    let mut count = 0;
+    while let Some(el) = iter.next() {
+        count += 1;
+        assert!(original.len() <= iter.size_hint().1.unwrap()+count);
+        assert!(original.len() >= iter.size_hint().0+count);
+        vec.push(el);
+    }
+    assert_eq!(original, vec);
 }
 
 // Tests an ExactSizeIterator against a Vec
@@ -384,10 +394,7 @@ fn line_to_iter() {
 #[test]
 fn line_to_lossy_iter() {
     with_pair_test_points(|a: Coordinate, b: Coordinate| {
-        let original = a.line_to_lossy(b);
-        let iter = a.line_to_lossy_iter(b);
-        assert!(original.len() <= iter.size_hint().1.unwrap());
-        assert_eq!(original, iter.collect::<Vec<_>>());
+        test_iter(a.line_to_lossy(b), a.line_to_lossy_iter(b));
     });
 }
 
