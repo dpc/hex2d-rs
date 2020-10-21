@@ -785,6 +785,7 @@ impl<I : Integer> Coordinate<I> {
             x: -r,
             y: max(-r, -(-r)-r),
             r,
+            counter: 0,
         }
     }
 
@@ -1008,6 +1009,7 @@ pub struct Range<I: Integer> {
     x: I,
     y: I,
     r: I,
+    counter: usize,
 }
 
 impl<
@@ -1037,19 +1039,15 @@ impl<
             y: self.source.y + self.y,
         });
         self.y += One::one();
+        self.counter += 1;
         ret
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let mut counter: usize = Zero::zero();
-        for x in range_inclusive(-self.r, self.r) {
-            for _ in range_inclusive(max(-self.r, -x-self.r), min(self.r, -x+self.r)) {
-                counter += 1;
-            }
-        }
         let rc = (if self.r < Zero::zero() { I::one()-self.r } else { self.r }).to_usize().unwrap();
         let total_size = 3*(rc+rc*rc)+1;
-        (total_size-counter, Some(total_size-counter))
+        let current_size = total_size-self.counter;
+        (current_size, Some(current_size))
     }
 }
 
