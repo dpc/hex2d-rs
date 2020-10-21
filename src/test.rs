@@ -383,9 +383,16 @@ fn ring_iter() {
             for direction in &ALL_DIRECTIONS {
                 for spin in &[CW(*direction), CCW(*direction)] {
                     let original = c.ring(*i, *spin);
-                    let iter = c.ring_iter(*i, *spin);
-                    assert_eq!(original.len(), iter.size_hint().1.unwrap());
-                    assert_eq!(original, iter.collect::<Vec<_>>());
+                    let mut iter = c.ring_iter(*i, *spin);
+                    assert_eq!(original.len(), iter.len());
+                    let mut vec = Vec::new();
+                    let mut count = 0;
+                    while let Some(el) = iter.next() {
+                        count += 1;
+                        assert_eq!(original.len(), iter.len()+count);
+                        vec.push(el);
+                    }
+                    assert_eq!(original, vec);
                 }
             }
         }
