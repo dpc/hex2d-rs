@@ -964,6 +964,10 @@ impl<
         ret
 
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (0, Some(if self.r == 0 { 1 } else if self.r < 0 { (self.r*-6) as usize } else { (self.r*6) as usize }))
+    }
 }
 
 impl<
