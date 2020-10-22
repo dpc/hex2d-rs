@@ -1128,6 +1128,17 @@ impl<
         + std::marker::Copy
         + num::NumCast
         + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    > iter::FusedIterator for LineToGen<I> {}
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
         + num::ToPrimitive
         + num::CheckedAdd
         + std::marker::Copy
@@ -1162,6 +1173,17 @@ impl<
         self.0.size_hint()
     }
 }
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    > iter::FusedIterator for LineTo<I> {}
 
 impl<
         I: num::Integer
@@ -1211,6 +1233,17 @@ impl<
     }
 }
 
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    > iter::FusedIterator for LineToLossy<I> {}
+
 #[derive(Clone, PartialEq, Debug, PartialOrd)]
 #[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
 /// An iterator over an a line of Coordinates, with edge detection
@@ -1240,6 +1273,17 @@ impl<
         self.0.size_hint()
     }
 }
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    > iter::FusedIterator for LineToWithEdgeDetection<I> {}
 
 impl<
         I: num::Integer
