@@ -73,7 +73,6 @@ use num::iter::range_inclusive;
 use std::ops::{Add, Sub, Neg};
 use std::cmp::{max, min};
 use std::convert::{Into, From, TryInto};
-use std::fmt::Debug;
 use std::f64::consts::PI;
 use std::iter;
 
