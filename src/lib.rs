@@ -1060,6 +1060,17 @@ impl<
         + num::CheckedAdd
         + std::marker::Copy
         + std::ops::AddAssign,
+    > iter::FusedIterator for Range<I> {}
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
     >
     iter::ExactSizeIterator for Range<I>
 {}
