@@ -579,6 +579,10 @@ impl<I : Integer> Coordinate<I> {
     }
 
     /// Construct a straight line to a `dest`
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use line_to_iter and collect instead"
+    )]
     pub fn line_to(&self, dest : Coordinate<I>) -> Vec<Coordinate<I>>
     where
         for <'a> &'a I: Add<&'a I, Output = I>
@@ -595,6 +599,10 @@ impl<I : Integer> Coordinate<I> {
     /// Construct a straight line to a `dest`
     ///
     /// Skip points on the border of two tiles
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use line_to_lossy_iter and collect instead"
+    )]
     pub fn line_to_lossy(&self, dest : Coordinate<I>) -> Vec<Coordinate<I>>
     where
         for <'a> &'a I: Add<&'a I, Output = I>
@@ -609,6 +617,10 @@ impl<I : Integer> Coordinate<I> {
     }
 
     /// Construct a straight line to a `dest`
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use line_to_with_edge_detection_iter and collect instead"
+    )]
     pub fn line_to_with_edge_detection(&self, dest : Coordinate<I>) -> Vec<(Coordinate<I>, Coordinate<I>)>
     where
         for <'a> &'a I: Add<&'a I, Output = I>
@@ -801,6 +813,10 @@ impl<I : Integer> Coordinate<I> {
     }
 
     /// All coordinates in radius `r`
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use range_iter and collect instead"
+    )]
     pub fn range(&self, r : I) -> Vec<Coordinate<I>>
     where
         for <'a> &'a I: Add<&'a I, Output = I>
@@ -860,6 +876,10 @@ impl<I : Integer> Coordinate<I> {
     ///     }
     /// }
     /// ```
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use ring_iter and collect instead"
+    )]
     pub fn ring(&self, r : i32, s : Spin) -> Vec<Coordinate<I>> {
         let mut res = Vec::with_capacity(if r == 0 { 1 } else if r < 0 { (r*-6) as usize } else { (r*6) as usize });
         self.for_each_in_ring(r, s, |c| res.push(c));
