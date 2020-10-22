@@ -356,6 +356,7 @@ fn simple_line_to() {
 }
 
 // Tests an iterator with size_hint against a Vec
+// Also tests for fused
 fn test_iter<T: std::cmp::PartialEq + std::fmt::Debug>(original: Vec<T>, mut iter: impl Iterator<Item=T>) {
     assert!(original.len() <= iter.size_hint().1.unwrap());
     assert!(original.len() >= iter.size_hint().0);
@@ -369,9 +370,14 @@ fn test_iter<T: std::cmp::PartialEq + std::fmt::Debug>(original: Vec<T>, mut ite
         vec.push(el);
     }
     assert_eq!(original, vec);
+
+    for _ in 0..10000 {
+        assert!(iter.next().is_none());
+    }
 }
 
 // Tests an ExactSizeIterator against a Vec
+// Also tests for fused
 fn test_iter_exact<T: std::cmp::PartialEq + std::fmt::Debug>(original: Vec<T>, mut iter: impl ExactSizeIterator<Item=T>) {
     assert_eq!(original.len(), iter.len());
     let mut vec = Vec::new();
@@ -382,6 +388,10 @@ fn test_iter_exact<T: std::cmp::PartialEq + std::fmt::Debug>(original: Vec<T>, m
         vec.push(el);
     }
     assert_eq!(original, vec);
+
+    for _ in 0..10000 {
+        assert!(iter.next().is_none());
+    }
 }
 
 #[test]
