@@ -1027,10 +1027,10 @@ impl<
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.y > min(self.r, -self.x+self.r) {
-            self.x += One::one();
-            if self.x > self.r {
+            if self.x >= self.r {
                 return None
             }
+            self.x += One::one();
             self.y = max(-self.r, -self.x-self.r);
         }
 
