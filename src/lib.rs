@@ -479,6 +479,10 @@ impl<I : Integer> Coordinate<I> {
     }
 
     /// Execute `f` for each coordinate in straight line from `self` to `dest`
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use line_to_iter instead"
+    )]
     pub fn for_each_in_line_to<F>(&self, dest : Coordinate<I>, mut f : F)
         where
         F : FnMut(Coordinate<I>),
@@ -508,6 +512,10 @@ impl<I : Integer> Coordinate<I> {
     /// Execute `f` for each coordinate in straight line from `self` to `dest`
     ///
     /// Skip points on the border of two tiles
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use line_to_lossy_iter instead"
+    )]
     pub fn for_each_in_line_to_lossy<F>(&self, dest : Coordinate<I>, mut f : F)
         where
         F : FnMut(Coordinate<I>),
@@ -539,6 +547,10 @@ impl<I : Integer> Coordinate<I> {
     /// Execute `f` for pairs of coordinates in straight line from `self` to `dest`
     ///
     /// On edge condition the pair contains different members, otherwise it's the same.
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use line_to_with_edge_detection_iter instead"
+    )]
     pub fn for_each_in_line_to_with_edge_detection<F>(&self, dest : Coordinate<I>, mut f : F)
         where
         F : FnMut((Coordinate<I>, Coordinate<I>)),
@@ -802,6 +814,10 @@ impl<I : Integer> Coordinate<I> {
     }
 
     /// Execute `f` for all coordinates in radius `r`
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use range_iter instead"
+    )]
     pub fn for_each_in_range<F>(&self, r : I, mut f : F)
         where
         F : FnMut(Coordinate<I>),
@@ -854,6 +870,10 @@ impl<I : Integer> Coordinate<I> {
     /// Call `f` for each coordinate in a ring
     ///
     /// See `ring` for a ring description.
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use ring_iter instead"
+    )]
     pub fn for_each_in_ring<F>(&self, r : i32, s : Spin, mut f : F)
         where F : FnMut(Coordinate<I>) {
 
