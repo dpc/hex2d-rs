@@ -72,8 +72,9 @@ use num::{Float, One, Zero};
 use num::iter::range_inclusive;
 use std::ops::{Add, Sub, Neg};
 use std::cmp::{max, min};
-use std::convert::{Into, From};
+use std::convert::{Into, From, TryInto};
 use std::f64::consts::PI;
+use std::iter;
 
 pub use Direction::*;
 pub use Angle::*;
@@ -440,7 +441,48 @@ impl<I : Integer> Coordinate<I> {
         rot_p + center
     }
 
+    fn line_to_iter_gen(&self, dest: Coordinate<I>) -> LineToGen<I> {
+        let n = self.distance(dest);
+
+        let ax = self.x.to_f32().unwrap();
+        let ay = self.y.to_f32().unwrap();
+        let bx = dest.x.to_f32().unwrap();
+        let by = dest.y.to_f32().unwrap();
+        LineToGen {
+            n,
+            ax,
+            ay,
+            bx,
+            by,
+
+            i: Zero::zero(),
+        }
+    }
+
+    /// Iterator over each coordinate in straight line from `self` to `dest`
+    pub fn line_to_iter(&self, dest: Coordinate<I>) -> LineTo<I> {
+        LineTo(self.line_to_iter_gen(dest))
+    }
+
+    /// Iterator over each coordinate in straight line from `self` to `dest`
+    ///
+    /// Skip points on the border of two tiles
+    pub fn line_to_lossy_iter(&self, dest: Coordinate<I>) -> LineToLossy<I> {
+        LineToLossy(self.line_to_iter_gen(dest))
+    }
+
+    /// Iterator over each coordinate in straight line from `self` to `dest`
+    ///
+    /// On edge condition the pair contains different members, otherwise it's the same.
+    pub fn line_to_with_edge_detection_iter(&self, dest: Coordinate<I>) -> LineToWithEdgeDetection<I> {
+        LineToWithEdgeDetection(self.line_to_iter_gen(dest))
+    }
+
     /// Execute `f` for each coordinate in straight line from `self` to `dest`
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use line_to_iter instead"
+    )]
     pub fn for_each_in_line_to<F>(&self, dest : Coordinate<I>, mut f : F)
         where
         F : FnMut(Coordinate<I>),
@@ -470,6 +512,10 @@ impl<I : Integer> Coordinate<I> {
     /// Execute `f` for each coordinate in straight line from `self` to `dest`
     ///
     /// Skip points on the border of two tiles
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use line_to_lossy_iter instead"
+    )]
     pub fn for_each_in_line_to_lossy<F>(&self, dest : Coordinate<I>, mut f : F)
         where
         F : FnMut(Coordinate<I>),
@@ -501,6 +547,10 @@ impl<I : Integer> Coordinate<I> {
     /// Execute `f` for pairs of coordinates in straight line from `self` to `dest`
     ///
     /// On edge condition the pair contains different members, otherwise it's the same.
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use line_to_with_edge_detection_iter instead"
+    )]
     pub fn for_each_in_line_to_with_edge_detection<F>(&self, dest : Coordinate<I>, mut f : F)
         where
         F : FnMut((Coordinate<I>, Coordinate<I>)),
@@ -529,6 +579,10 @@ impl<I : Integer> Coordinate<I> {
     }
 
     /// Construct a straight line to a `dest`
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use line_to_iter and collect instead"
+    )]
     pub fn line_to(&self, dest : Coordinate<I>) -> Vec<Coordinate<I>>
     where
         for <'a> &'a I: Add<&'a I, Output = I>
@@ -545,6 +599,10 @@ impl<I : Integer> Coordinate<I> {
     /// Construct a straight line to a `dest`
     ///
     /// Skip points on the border of two tiles
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use line_to_lossy_iter and collect instead"
+    )]
     pub fn line_to_lossy(&self, dest : Coordinate<I>) -> Vec<Coordinate<I>>
     where
         for <'a> &'a I: Add<&'a I, Output = I>
@@ -559,6 +617,10 @@ impl<I : Integer> Coordinate<I> {
     }
 
     /// Construct a straight line to a `dest`
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use line_to_with_edge_detection_iter and collect instead"
+    )]
     pub fn line_to_with_edge_detection(&self, dest : Coordinate<I>) -> Vec<(Coordinate<I>, Coordinate<I>)>
     where
         for <'a> &'a I: Add<&'a I, Output = I>
@@ -739,7 +801,22 @@ impl<I : Integer> Coordinate<I> {
             / num::FromPrimitive::from_i8(2).unwrap()
     }
 
+    /// An iterator over all coordinates in radius `r`
+    pub fn range_iter(&self, r : I) -> Range<I> {
+        Range{
+            source: *self,
+            x: -r,
+            y: max(-r, -(-r)-r),
+            r,
+            counter: 0,
+        }
+    }
+
     /// All coordinates in radius `r`
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use range_iter and collect instead"
+    )]
     pub fn range(&self, r : I) -> Vec<Coordinate<I>>
     where
         for <'a> &'a I: Add<&'a I, Output = I>
@@ -753,6 +830,10 @@ impl<I : Integer> Coordinate<I> {
     }
 
     /// Execute `f` for all coordinates in radius `r`
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use range_iter instead"
+    )]
     pub fn for_each_in_range<F>(&self, r : I, mut f : F)
         where
         F : FnMut(Coordinate<I>),
@@ -795,6 +876,10 @@ impl<I : Integer> Coordinate<I> {
     ///     }
     /// }
     /// ```
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use ring_iter and collect instead"
+    )]
     pub fn ring(&self, r : i32, s : Spin) -> Vec<Coordinate<I>> {
         let mut res = Vec::with_capacity(if r == 0 { 1 } else if r < 0 { (r*-6) as usize } else { (r*6) as usize });
         self.for_each_in_ring(r, s, |c| res.push(c));
@@ -805,6 +890,10 @@ impl<I : Integer> Coordinate<I> {
     /// Call `f` for each coordinate in a ring
     ///
     /// See `ring` for a ring description.
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use ring_iter instead"
+    )]
     pub fn for_each_in_ring<F>(&self, r : i32, s : Spin, mut f : F)
         where F : FnMut(Coordinate<I>) {
 
@@ -832,7 +921,433 @@ impl<I : Integer> Coordinate<I> {
             cur_dir = cur_dir + step_angle;
         }
     }
+
+    /// Iterator over each coordinate in a ring
+    ///
+    /// See `ring` for a ring description.
+    pub fn ring_iter(&self, r : i32, s : Spin) -> Ring<I> {
+
+        let (start_angle, step_angle, start_dir) = match s {
+            CW(d) => (RightBack, Right, d),
+            CCW(d) => (LeftBack, Left, d),
+        };
+
+        let cur_coord = *self + Coordinate::<I>::from(start_dir).scale(
+            num::FromPrimitive::from_i32(r).unwrap()
+        );
+        let cur_dir = start_dir + start_angle;
+
+
+        Ring {
+            source: *self,
+            cur_coord,
+            cur_dir,
+            step_angle,
+            r,
+            ii: 0,
+            jj: 0,
+            fuse: false,
+        }
+    }
 }
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
+#[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
+/// Iterator over a ring
+pub struct Ring<I: Integer> {
+    source: Coordinate<I>,
+    cur_coord: Coordinate<I>,
+    cur_dir: Direction,
+    step_angle: Angle,
+    r: i32,
+    ii: i32,
+    jj: i32,
+    fuse: bool,
+}
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    > Iterator for Ring<I>
+{
+    type Item = Coordinate<I>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.fuse {
+            return None;
+        }
+        if self.r.is_zero() {
+            self.fuse = true;
+            return Some(self.source)
+        }
+
+        if self.jj >= self.r {
+            self.ii += 1;
+            if self.ii >= 6 {
+                self.fuse = true;
+                return None
+            }
+            self.cur_dir = self.cur_dir + self.step_angle;
+            self.jj = 0;
+        }
+        self.jj += 1;
+
+        let ret = Some(self.cur_coord);
+        let cur_dir_coord: Coordinate<_> = self.cur_dir.into();
+        self.cur_coord = self.cur_coord + cur_dir_coord;
+
+        ret
+
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        if self.fuse {
+            return (0, Some(0));
+        }
+        let total_size: usize = if self.r == 0 { 1 } else if self.r < 0 { (self.r*-6) as usize } else { (self.r*6) as usize };
+        let past: usize = max(0, (self.jj+self.ii*self.r).try_into().unwrap());
+        (total_size-past , Some(total_size-past))
+    }
+}
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    > iter::FusedIterator for Ring<I> {}
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    > iter::ExactSizeIterator for Ring<I> {}
+
+
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
+#[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
+/// Iterator over an range
+pub struct Range<I: Integer> {
+    source: Coordinate<I>,
+    x: I,
+    y: I,
+    r: I,
+    counter: usize,
+}
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    > Iterator for Range<I>
+{
+    type Item = Coordinate<I>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.y > min(self.r, -self.x+self.r) {
+            if self.x >= self.r {
+                return None
+            }
+            self.x += One::one();
+            self.y = max(-self.r, -self.x-self.r);
+        }
+
+        let ret = Some(Coordinate{
+            x: self.source.x + self.x,
+            y: self.source.y + self.y,
+        });
+        self.y += One::one();
+        self.counter += 1;
+        ret
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let rc = (if self.r < Zero::zero() { I::one()-self.r } else { self.r }).to_usize().unwrap();
+        let total_size = 3*(rc+rc*rc)+1;
+        let current_size = total_size-self.counter;
+        (current_size, Some(current_size))
+    }
+}
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    > iter::FusedIterator for Range<I> {}
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    >
+    iter::ExactSizeIterator for Range<I>
+{}
+
+
+#[derive(Clone, PartialEq, Debug, PartialOrd)]
+#[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
+/// Genertic iterator over a line return x, y values
+struct LineToGen<I: Integer> {
+    ax: f32,
+    ay: f32,
+    bx: f32,
+    by: f32,
+    n: I,
+    i: I,
+}
+
+impl<
+        I: num::Integer
+            + num::Signed
+            + std::marker::Copy
+            + num::NumCast
+            + num::FromPrimitive
+            + num::ToPrimitive
+            + num::CheckedAdd
+            + std::marker::Copy
+            + std::ops::AddAssign,
+    > Iterator for LineToGen<I>
+{
+    type Item = (f32, f32);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.n == Zero::zero() {
+            if self.i == Zero::zero() {
+                self.i += One::one();
+                return Some((self.ax, self.ay));
+            } else {
+                return None;
+            }
+        }
+
+        if self.i > self.n {
+            return None;
+        }
+
+        let d = self.i.to_f32().unwrap() / self.n.to_f32().unwrap();
+        let x = self.ax + (self.bx - self.ax) * d;
+        let y = self.ay + (self.by - self.ay) * d;
+        self.i += One::one();
+        Some((x, y))
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let origin = Coordinate::<I>::nearest(self.ax, self.ay);
+        let dest = Coordinate::nearest(self.bx, self.by);
+        let total_size = origin.distance(dest) + One::one();
+        let len = total_size-self.i;
+        let len = len.to_usize().unwrap();
+        (len, Some(len))
+    }
+}
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    > iter::FusedIterator for LineToGen<I> {}
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::ToPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    >
+    iter::ExactSizeIterator for LineToGen<I>
+{}
+
+#[derive(Clone, PartialEq, Debug, PartialOrd)]
+#[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
+/// An iterator over an a line of Coordinates
+pub struct LineTo<I: Integer> (LineToGen<I>);
+
+impl<
+        I: num::Integer
+            + num::Signed
+            + std::marker::Copy
+            + num::NumCast
+            + num::FromPrimitive
+            + num::ToPrimitive
+            + num::CheckedAdd
+            + std::marker::Copy
+            + std::ops::AddAssign,
+    > Iterator for LineTo<I>
+{
+    type Item = Coordinate<I>;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next().map(|(x, y)| Coordinate::nearest(x, y))
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.0.size_hint()
+    }
+}
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    > iter::FusedIterator for LineTo<I> {}
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::ToPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    >
+    iter::ExactSizeIterator for LineTo<I>
+{}
+
+#[derive(Clone, PartialEq, Debug, PartialOrd)]
+#[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
+/// An iterator over an a line of Coordinates, using a lossy algorithm
+pub struct LineToLossy<I: Integer> (LineToGen<I>);
+
+impl<
+        I: num::Integer
+            + num::Signed
+            + std::marker::Copy
+            + num::NumCast
+            + num::FromPrimitive
+            + num::ToPrimitive
+            + num::CheckedAdd
+            + std::marker::Copy
+            + std::ops::AddAssign,
+    > Iterator for LineToLossy<I>
+{
+    type Item = Coordinate<I>;
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            let c = self.0.next().map(|(x, y)| Coordinate::nearest_lossy(x, y));
+            match c {
+                Some(c@Some(_)) => return c,
+                Some(None) => continue,
+                None => return None,
+            }
+        }
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.0.size_hint().0/2, self.0.size_hint().1)
+    }
+}
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    > iter::FusedIterator for LineToLossy<I> {}
+
+#[derive(Clone, PartialEq, Debug, PartialOrd)]
+#[cfg_attr(feature="serde-serde", derive(Serialize, Deserialize))]
+/// An iterator over an a line of Coordinates, with edge detection
+pub struct LineToWithEdgeDetection<I: Integer> (LineToGen<I>);
+
+impl<
+        I: num::Integer
+            + num::Signed
+            + std::marker::Copy
+            + num::NumCast
+            + num::FromPrimitive
+            + num::ToPrimitive
+            + num::CheckedAdd
+            + std::marker::Copy
+            + std::ops::AddAssign,
+    > Iterator for LineToWithEdgeDetection<I>
+{
+    type Item = (Coordinate<I>, Coordinate<I>);
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next().map(|(x, y)| (
+            Coordinate::nearest(x + 0.000001, y + 0.000001),
+            Coordinate::nearest(x - 0.000001, y - 0.000001)
+        ))
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.0.size_hint()
+    }
+}
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    > iter::FusedIterator for LineToWithEdgeDetection<I> {}
+
+impl<
+        I: num::Integer
+        + num::Signed
+        + std::marker::Copy
+        + num::NumCast
+        + num::FromPrimitive
+        + num::ToPrimitive
+        + num::CheckedAdd
+        + std::marker::Copy
+        + std::ops::AddAssign,
+    >
+    iter::ExactSizeIterator for LineToWithEdgeDetection<I>
+{}
 
 impl<I : Integer> From<(I, I)> for Coordinate<I> {
     fn from(xy: (I, I)) -> Self {

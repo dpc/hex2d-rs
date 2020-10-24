@@ -14,6 +14,21 @@ fn with_test_points<F : Fn(Coordinate) -> ()>(f : F) {
     }
 }
 
+fn with_pair_test_points<F: Fn(Coordinate, Coordinate) -> ()>(f: F) {
+    let offs = [-2i32, -1, 0, 1, 2, 1000, -1000, 1001, -1001];
+    for &ax in offs.iter() {
+        for &ay in offs.iter() {
+            let a = Coordinate::new(ax, ay);
+            for &bx in offs.iter() {
+                for &by in offs.iter() {
+                    let b = Coordinate::new(bx, by);
+                    f(a, b)
+                }
+            }
+        }
+    }
+}
+
 #[test]
 fn coord_add_and_sub() {
     let a = Coordinate::new(-1, 2);
@@ -340,3 +355,84 @@ fn simple_line_to() {
     });
 }
 
+// Tests an iterator with size_hint against a Vec
+// Also tests for fused
+fn test_iter<T: std::cmp::PartialEq + std::fmt::Debug>(original: Vec<T>, mut iter: impl Iterator<Item=T>) {
+    assert!(original.len() <= iter.size_hint().1.unwrap());
+    assert!(original.len() >= iter.size_hint().0);
+
+    let mut vec = Vec::new();
+    let mut count = 0;
+    while let Some(el) = iter.next() {
+        count += 1;
+        assert!(original.len() <= iter.size_hint().1.unwrap()+count);
+        assert!(original.len() >= iter.size_hint().0+count);
+        vec.push(el);
+    }
+    assert_eq!(original, vec);
+
+    for _ in 0..10000 {
+        assert!(iter.next().is_none());
+    }
+}
+
+// Tests an ExactSizeIterator against a Vec
+// Also tests for fused
+fn test_iter_exact<T: std::cmp::PartialEq + std::fmt::Debug>(original: Vec<T>, mut iter: impl ExactSizeIterator<Item=T>) {
+    assert_eq!(original.len(), iter.len());
+    let mut vec = Vec::new();
+    let mut count = 0;
+    while let Some(el) = iter.next() {
+        count += 1;
+        assert_eq!(original.len(), iter.len()+count);
+        vec.push(el);
+    }
+    assert_eq!(original, vec);
+
+    for _ in 0..10000 {
+        assert!(iter.next().is_none());
+    }
+}
+
+#[test]
+fn line_to_iter() {
+    with_pair_test_points(|a: Coordinate, b: Coordinate| {
+        test_iter_exact(a.line_to(b), a.line_to_iter(b));
+    });
+}
+
+#[test]
+fn line_to_lossy_iter() {
+    with_pair_test_points(|a: Coordinate, b: Coordinate| {
+        test_iter(a.line_to_lossy(b), a.line_to_lossy_iter(b));
+    });
+}
+
+#[test]
+fn line_to_with_edge_detection_iter() {
+    with_pair_test_points(|a: Coordinate, b: Coordinate| {
+        test_iter_exact(a.line_to_with_edge_detection(b), a.line_to_with_edge_detection_iter(b));
+    });
+}
+
+#[test]
+fn range_iter() {
+    with_test_points(|c : Coordinate| {
+        for i in &[0, 1, 2, 4, 10, 40]{
+            test_iter_exact(c.range(*i), c.range_iter(*i));
+        }
+    });
+}
+
+#[test]
+fn ring_iter() {
+    with_test_points(|c : Coordinate| {
+        for i in &[0, 1, 2, 4, 10, 40]{
+            for direction in &ALL_DIRECTIONS {
+                for spin in &[CW(*direction), CCW(*direction)] {
+                    test_iter_exact(c.ring(*i, *spin), c.ring_iter(*i, *spin));
+                }
+            }
+        }
+    });
+}
