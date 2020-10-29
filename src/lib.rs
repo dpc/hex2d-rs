@@ -1,4 +1,3 @@
-// Copyright 2014 Dawid Ciężarkiewicz
 // See LICENSE file for more information
 
 //! Hexagonal map operations utility library
@@ -69,7 +68,6 @@ extern crate serde;
 extern crate serde_derive;
 
 use num::{Float, One, Zero};
-use num::iter::range_inclusive;
 use std::ops::{Add, Sub, Neg};
 use std::cmp::{max, min};
 use std::convert::{Into, From, TryInto};
@@ -220,12 +218,6 @@ impl<I : Integer> Coordinate<I> {
         Coordinate { x: x, y: y}
     }
 
-    /// Old name for `nearest`
-    #[deprecated(note="use `nearest` instead")]
-    pub fn from_round(x : f32, y : f32) -> Coordinate<I> {
-        Coordinate::nearest(x, y)
-    }
-
     /// Round x, y float to nearest hex coordinates
     pub fn nearest<F: Float>(x : F, y : F) -> Coordinate<I> {
         let zero: F = Zero::zero();
@@ -252,12 +244,6 @@ impl<I : Integer> Coordinate<I> {
             x: I::from(rx).unwrap(),
             y: I::from(ry).unwrap(),
         }
-    }
-
-    /// Old name for `nearest_lossy`
-    #[deprecated(note="use `nearest_lossy` instead")]
-    pub fn from_round_lossy(x : f32, y : f32) -> Option<Coordinate<I>> {
-        Coordinate::nearest_lossy(x, y)
     }
 
     /// Round x, y float to nearest hex coordinates
@@ -295,12 +281,6 @@ impl<I : Integer> Coordinate<I> {
             x: I::from(rx).unwrap(),
             y: I::from(ry).unwrap(),
         })
-    }
-
-    /// Old name for `nearest_with_offset`
-    #[deprecated(note="use `nearest_with_offset` instead")]
-    pub fn from_pixel_integer(spacing : IntegerSpacing<I>, v : (I, I)) -> (Coordinate<I>, (I, I)) {
-        Coordinate::nearest_with_offset(spacing, v)
     }
 
     /// Find the hex containing a pixel. The origin of the pixel coordinates
@@ -476,162 +456,6 @@ impl<I : Integer> Coordinate<I> {
     /// On edge condition the pair contains different members, otherwise it's the same.
     pub fn line_to_with_edge_detection_iter(&self, dest: Coordinate<I>) -> LineToWithEdgeDetection<I> {
         LineToWithEdgeDetection(self.line_to_iter_gen(dest))
-    }
-
-    /// Execute `f` for each coordinate in straight line from `self` to `dest`
-    #[deprecated(
-        since = "0.4.0",
-        note = "Please use line_to_iter instead"
-    )]
-    pub fn for_each_in_line_to<F>(&self, dest : Coordinate<I>, mut f : F)
-        where
-        F : FnMut(Coordinate<I>),
-        for <'a> &'a I: Add<&'a I, Output = I>
-        {
-            if *self == dest {
-                f(*self);
-                return;
-            }
-
-            let n = self.distance(dest);
-
-            let ax = self.x.to_f32().unwrap();
-            let ay = self.y.to_f32().unwrap();
-            let bx = dest.x.to_f32().unwrap();
-            let by = dest.y.to_f32().unwrap();
-
-            for i in range_inclusive(Zero::zero(), n) {
-                let d = i.to_f32().unwrap() / n.to_f32().unwrap();
-                let x = ax + (bx - ax) * d;
-                let y = ay + (by - ay) * d;
-                let c = Coordinate::nearest(x, y);
-                f(c);
-            }
-    }
-
-    /// Execute `f` for each coordinate in straight line from `self` to `dest`
-    ///
-    /// Skip points on the border of two tiles
-    #[deprecated(
-        since = "0.4.0",
-        note = "Please use line_to_lossy_iter instead"
-    )]
-    pub fn for_each_in_line_to_lossy<F>(&self, dest : Coordinate<I>, mut f : F)
-        where
-        F : FnMut(Coordinate<I>),
-        for <'a> &'a I: Add<&'a I, Output = I>
-        {
-            if *self == dest {
-                f(*self);
-                return;
-            }
-
-            let n = self.distance(dest);
-
-            let ax = self.x.to_f32().unwrap();
-            let ay = self.y.to_f32().unwrap();
-            let bx = dest.x.to_f32().unwrap();
-            let by = dest.y.to_f32().unwrap();
-
-            for i in range_inclusive(Zero::zero(), n) {
-                let d = i.to_f32().unwrap() / n.to_f32().unwrap();
-                let x = ax + (bx - ax) * d;
-                let y = ay + (by - ay) * d;
-                let c = Coordinate::nearest_lossy(x, y);
-                if let Some(c) = c {
-                    f(c);
-                }
-            }
-    }
-
-    /// Execute `f` for pairs of coordinates in straight line from `self` to `dest`
-    ///
-    /// On edge condition the pair contains different members, otherwise it's the same.
-    #[deprecated(
-        since = "0.4.0",
-        note = "Please use line_to_with_edge_detection_iter instead"
-    )]
-    pub fn for_each_in_line_to_with_edge_detection<F>(&self, dest : Coordinate<I>, mut f : F)
-        where
-        F : FnMut((Coordinate<I>, Coordinate<I>)),
-        for <'a> &'a I: Add<&'a I, Output = I>
-        {
-            if *self == dest {
-                f((*self, *self));
-                return;
-            }
-
-            let n = self.distance(dest);
-
-            let ax = self.x.to_f32().unwrap();
-            let ay = self.y.to_f32().unwrap();
-            let bx = dest.x.to_f32().unwrap();
-            let by = dest.y.to_f32().unwrap();
-
-            for i in range_inclusive(Zero::zero(), n) {
-                let d = i.to_f32().unwrap() / n.to_f32().unwrap();
-                let x = ax + (bx - ax) * d;
-                let y = ay + (by - ay) * d;
-                let c1 = Coordinate::nearest(x + 0.000001, y + 0.000001);
-                let c2 = Coordinate::nearest(x - 0.000001, y - 0.000001);
-                f((c1, c2));
-            }
-    }
-
-    /// Construct a straight line to a `dest`
-    #[deprecated(
-        since = "0.4.0",
-        note = "Please use line_to_iter and collect instead"
-    )]
-    pub fn line_to(&self, dest : Coordinate<I>) -> Vec<Coordinate<I>>
-    where
-        for <'a> &'a I: Add<&'a I, Output = I>
-    {
-        let mut res = Vec::new();
-
-        self.for_each_in_line_to(dest, |c| {
-            res.push(c);
-        });
-
-        res
-    }
-
-    /// Construct a straight line to a `dest`
-    ///
-    /// Skip points on the border of two tiles
-    #[deprecated(
-        since = "0.4.0",
-        note = "Please use line_to_lossy_iter and collect instead"
-    )]
-    pub fn line_to_lossy(&self, dest : Coordinate<I>) -> Vec<Coordinate<I>>
-    where
-        for <'a> &'a I: Add<&'a I, Output = I>
-    {
-        let mut res = Vec::new();
-
-        self.for_each_in_line_to_lossy(dest, |c| {
-            res.push(c);
-        });
-
-        res
-    }
-
-    /// Construct a straight line to a `dest`
-    #[deprecated(
-        since = "0.4.0",
-        note = "Please use line_to_with_edge_detection_iter and collect instead"
-    )]
-    pub fn line_to_with_edge_detection(&self, dest : Coordinate<I>) -> Vec<(Coordinate<I>, Coordinate<I>)>
-    where
-        for <'a> &'a I: Add<&'a I, Output = I>
-    {
-        let mut res = Vec::new();
-
-        self.for_each_in_line_to_with_edge_detection(dest, |c| {
-            res.push(c);
-        });
-
-        res
     }
 
     /// Z coordinate
@@ -812,43 +636,7 @@ impl<I : Integer> Coordinate<I> {
         }
     }
 
-    /// All coordinates in radius `r`
-    #[deprecated(
-        since = "0.4.0",
-        note = "Please use range_iter and collect instead"
-    )]
-    pub fn range(&self, r : I) -> Vec<Coordinate<I>>
-    where
-        for <'a> &'a I: Add<&'a I, Output = I>
-    {
-
-        let rc = (if r < Zero::zero() { I::one()-r } else { r }).to_usize().unwrap();
-        let mut res = Vec::with_capacity(3*(rc+rc*rc)+1);
-        self.for_each_in_range(r, |c| res.push(c));
-
-        res
-    }
-
-    /// Execute `f` for all coordinates in radius `r`
-    #[deprecated(
-        since = "0.4.0",
-        note = "Please use range_iter instead"
-    )]
-    pub fn for_each_in_range<F>(&self, r : I, mut f : F)
-        where
-        F : FnMut(Coordinate<I>),
-        for <'a> &'a I: Add<&'a I, Output = I> {
-        for x in range_inclusive(-r, r) {
-            for y in range_inclusive(max(-r, -x-r), min(r, -x+r)) {
-                f(Coordinate{
-                    x: self.x + x,
-                    y: self.y + y,
-                });
-            }
-        }
-    }
-
-    /// A ring of radius `r`, starting in a corner in a given Direction
+    /// Iterator over each coordinate in a ring
     ///
     /// Example: Elements in order for Ring of radius 2, Direction ZX, CCW
     ///
@@ -871,60 +659,11 @@ impl<I : Integer> Coordinate<I> {
     /// let center = Coordinate::new(5, -1);
     ///
     /// for &c in &center.neighbors() {
-    ///     for &ring_c in &c.ring(5, Spin::CCW(XY)) {
+    ///     for ring_c in c.ring_iter(5, Spin::CCW(XY)) {
     ///         assert_eq!(c.distance(ring_c), 5);
     ///     }
     /// }
     /// ```
-    #[deprecated(
-        since = "0.4.0",
-        note = "Please use ring_iter and collect instead"
-    )]
-    pub fn ring(&self, r : i32, s : Spin) -> Vec<Coordinate<I>> {
-        let mut res = Vec::with_capacity(if r == 0 { 1 } else if r < 0 { (r*-6) as usize } else { (r*6) as usize });
-        self.for_each_in_ring(r, s, |c| res.push(c));
-
-        res
-    }
-
-    /// Call `f` for each coordinate in a ring
-    ///
-    /// See `ring` for a ring description.
-    #[deprecated(
-        since = "0.4.0",
-        note = "Please use ring_iter instead"
-    )]
-    pub fn for_each_in_ring<F>(&self, r : i32, s : Spin, mut f : F)
-        where F : FnMut(Coordinate<I>) {
-
-        if r == 0 {
-            f(*self);
-            return;
-        }
-
-        let (start_angle, step_angle, start_dir) = match s {
-            CW(d) => (RightBack, Right, d),
-            CCW(d) => (LeftBack, Left, d),
-        };
-
-        let mut cur_coord = *self + Coordinate::<I>::from(start_dir).scale(
-            num::FromPrimitive::from_i32(r).unwrap()
-        );
-        let mut cur_dir = start_dir + start_angle;
-
-        for _ in 0..6 {
-            let cur_dir_coord: Coordinate<_> = cur_dir.into();
-            for _ in 0..r {
-                f(cur_coord);
-                cur_coord = cur_coord + cur_dir_coord;
-            }
-            cur_dir = cur_dir + step_angle;
-        }
-    }
-
-    /// Iterator over each coordinate in a ring
-    ///
-    /// See `ring` for a ring description.
     pub fn ring_iter(&self, r : i32, s : Spin) -> Ring<I> {
 
         let (start_angle, step_angle, start_dir) = match s {

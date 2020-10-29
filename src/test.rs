@@ -1,4 +1,3 @@
-// Copyright 2014 Dawid Ciężarkiewicz
 // See LICENSE file for more information
 
 use super::*;
@@ -10,21 +9,6 @@ fn with_test_points<F : Fn(Coordinate) -> ()>(f : F) {
         for &y in offs.iter() {
             let p = Coordinate::new(x, y);
             f(p)
-        }
-    }
-}
-
-fn with_pair_test_points<F: Fn(Coordinate, Coordinate) -> ()>(f: F) {
-    let offs = [-2i32, -1, 0, 1, 2, 1000, -1000, 1001, -1001];
-    for &ax in offs.iter() {
-        for &ay in offs.iter() {
-            let a = Coordinate::new(ax, ay);
-            for &bx in offs.iter() {
-                for &by in offs.iter() {
-                    let b = Coordinate::new(bx, by);
-                    f(a, b)
-                }
-            }
         }
     }
 }
@@ -118,11 +102,11 @@ fn move_circularly_double() {
 #[test]
 fn coord_range() {
     with_test_points(|c : Coordinate| {
-        assert_eq!(1, c.range(0).len());
-        assert_eq!(7, c.range(1).len());
-        assert_eq!(19, c.range(2).len());
-        assert_eq!(37, c.range(3).len());
-        assert_eq!((5 + 6 + 7 + 8 ) * 2 + 9, c.range(4).len());
+        assert_eq!(1, c.range_iter(0).count());
+        assert_eq!(7, c.range_iter(1).count());
+        assert_eq!(19, c.range_iter(2).count());
+        assert_eq!(37, c.range_iter(3).count());
+        assert_eq!((5 + 6 + 7 + 8 ) * 2 + 9, c.range_iter(4).count());
     });
 }
 
@@ -130,7 +114,7 @@ fn coord_range() {
 fn range_distance() {
     with_test_points(|c : Coordinate| {
         for r in 0..10 {
-            for p in c.range(r).iter() {
+            for p in c.range_iter(r) {
                 assert!(p.distance(c) <= r);
             }
         }
@@ -143,21 +127,21 @@ fn simple_rings() {
         for &d in Direction::all().iter() {
             {
                 // CW r0
-                let ring = c.ring(0, Spin::CW(d));
+                let ring = c.ring_iter(0, Spin::CW(d)).collect::<Vec<_>>();
 
                 assert_eq!(1, ring.len());
                 assert_eq!(ring[0], c);
             }
             {
                 // CCW r0
-                let ring = c.ring(0, Spin::CCW(d));
+                let ring = c.ring_iter(0, Spin::CCW(d)).collect::<Vec<_>>();
 
                 assert_eq!(1, ring.len());
                 assert_eq!(ring[0], c);
             }
             {
                 // CCW r1
-                let ring = c.ring(1, Spin::CW(d));
+                let ring = c.ring_iter(1, Spin::CW(d)).collect::<Vec<_>>();
 
                 assert_eq!(6, ring.len());
                 assert_eq!(ring[0], c + d);
@@ -169,7 +153,7 @@ fn simple_rings() {
             }
             {
                 // CCW r1
-                let ring = c.ring(1, Spin::CCW(d));
+                let ring = c.ring_iter(1, Spin::CCW(d)).collect::<Vec<_>>();
 
                 assert_eq!(6, ring.len());
                 assert_eq!(ring[0], c + d);
@@ -181,7 +165,7 @@ fn simple_rings() {
             }
             {
                 // CW r2
-                let ring = c.ring(2, Spin::CW(d));
+                let ring = c.ring_iter(2, Spin::CW(d)).collect::<Vec<_>>();
 
                 assert_eq!(12, ring.len());
                 assert_eq!(ring[0], c + d + d);
@@ -191,7 +175,7 @@ fn simple_rings() {
             }
             {
                 // CCW r2
-                let ring = c.ring(2, Spin::CCW(d));
+                let ring = c.ring_iter(2, Spin::CCW(d)).collect::<Vec<_>>();
 
                 assert_eq!(12, ring.len());
                 assert_eq!(ring[0], c + d + d);
@@ -351,88 +335,7 @@ fn simple_direction_sub() {
 #[test]
 fn simple_line_to() {
     with_test_points(|c : Coordinate| {
-        assert_eq!(c.line_to(c), vec!(c));
+        assert_eq!(c.line_to_iter(c).collect::<Vec<_>>(), vec!(c));
     });
 }
 
-// Tests an iterator with size_hint against a Vec
-// Also tests for fused
-fn test_iter<T: std::cmp::PartialEq + std::fmt::Debug>(original: Vec<T>, mut iter: impl Iterator<Item=T>) {
-    assert!(original.len() <= iter.size_hint().1.unwrap());
-    assert!(original.len() >= iter.size_hint().0);
-
-    let mut vec = Vec::new();
-    let mut count = 0;
-    while let Some(el) = iter.next() {
-        count += 1;
-        assert!(original.len() <= iter.size_hint().1.unwrap()+count);
-        assert!(original.len() >= iter.size_hint().0+count);
-        vec.push(el);
-    }
-    assert_eq!(original, vec);
-
-    for _ in 0..10000 {
-        assert!(iter.next().is_none());
-    }
-}
-
-// Tests an ExactSizeIterator against a Vec
-// Also tests for fused
-fn test_iter_exact<T: std::cmp::PartialEq + std::fmt::Debug>(original: Vec<T>, mut iter: impl ExactSizeIterator<Item=T>) {
-    assert_eq!(original.len(), iter.len());
-    let mut vec = Vec::new();
-    let mut count = 0;
-    while let Some(el) = iter.next() {
-        count += 1;
-        assert_eq!(original.len(), iter.len()+count);
-        vec.push(el);
-    }
-    assert_eq!(original, vec);
-
-    for _ in 0..10000 {
-        assert!(iter.next().is_none());
-    }
-}
-
-#[test]
-fn line_to_iter() {
-    with_pair_test_points(|a: Coordinate, b: Coordinate| {
-        test_iter_exact(a.line_to(b), a.line_to_iter(b));
-    });
-}
-
-#[test]
-fn line_to_lossy_iter() {
-    with_pair_test_points(|a: Coordinate, b: Coordinate| {
-        test_iter(a.line_to_lossy(b), a.line_to_lossy_iter(b));
-    });
-}
-
-#[test]
-fn line_to_with_edge_detection_iter() {
-    with_pair_test_points(|a: Coordinate, b: Coordinate| {
-        test_iter_exact(a.line_to_with_edge_detection(b), a.line_to_with_edge_detection_iter(b));
-    });
-}
-
-#[test]
-fn range_iter() {
-    with_test_points(|c : Coordinate| {
-        for i in &[0, 1, 2, 4, 10, 40]{
-            test_iter_exact(c.range(*i), c.range_iter(*i));
-        }
-    });
-}
-
-#[test]
-fn ring_iter() {
-    with_test_points(|c : Coordinate| {
-        for i in &[0, 1, 2, 4, 10, 40]{
-            for direction in &ALL_DIRECTIONS {
-                for spin in &[CW(*direction), CCW(*direction)] {
-                    test_iter_exact(c.ring(*i, *spin), c.ring_iter(*i, *spin));
-                }
-            }
-        }
-    });
-}
