@@ -664,7 +664,7 @@ impl<I : Integer> Coordinate<I> {
     ///     }
     /// }
     /// ```
-    pub fn ring_iter(&self, r : i32, s : Spin) -> Ring<I> {
+    pub fn ring_iter(&self, r : u32, s : Spin) -> Ring<I> {
 
         let (start_angle, step_angle, start_dir) = match s {
             CW(d) => (RightBack, Right, d),
