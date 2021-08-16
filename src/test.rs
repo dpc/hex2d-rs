@@ -183,6 +183,16 @@ fn simple_rings() {
                 assert_eq!(ring[7], c - d - d - (d + LeftBack));
                 assert_eq!(ring[11], c + d + d + (d + RightBack));
             }
+            { 
+                // CW r-2
+                let ring = c.ring_iter(-2, Spin::CW(d)).collect::<Vec<_>>();
+
+                assert_eq!(12, ring.len());
+                assert_eq!(ring[0], c - d - d);
+                assert_eq!(ring[1], c - d - d - (d + RightBack));
+                assert_eq!(ring[7], c + d + d + (d + RightBack));
+                assert_eq!(ring[11], c - d - d - (d + LeftBack));
+            }
         }
     })
 }

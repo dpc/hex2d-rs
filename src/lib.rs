@@ -667,8 +667,8 @@ impl<I : Integer> Coordinate<I> {
     pub fn ring_iter(&self, r : i32, s : Spin) -> Ring<I> {
 
         let (start_angle, step_angle, start_dir) = match s {
-            CW(d) => (RightBack, Right, d),
-            CCW(d) => (LeftBack, Left, d),
+            CW(d) => (if r >= 0 { RightBack } else { Left }, Right, d),
+            CCW(d) => (if r >= 0 { LeftBack } else { Right }, Left, d),
         };
 
         let cur_coord = *self + Coordinate::<I>::from(start_dir).scale(
@@ -682,7 +682,7 @@ impl<I : Integer> Coordinate<I> {
             cur_coord,
             cur_dir,
             step_angle,
-            r,
+            r: r.abs(),
             ii: 0,
             jj: 0,
             fuse: false,
@@ -726,7 +726,7 @@ impl<
             return Some(self.source)
         }
 
-        if self.jj >= self.r {
+        if self.jj >= self.r.abs() {
             self.ii += 1;
             if self.ii >= 6 {
                 self.fuse = true;
@@ -749,7 +749,7 @@ impl<
         if self.fuse {
             return (0, Some(0));
         }
-        let total_size: usize = if self.r == 0 { 1 } else if self.r < 0 { (self.r*-6) as usize } else { (self.r*6) as usize };
+        let total_size: usize = if self.r == 0 { 1 } else { (self.r*6) as usize };
         let past: usize = max(0, (self.jj+self.ii*self.r).try_into().unwrap());
         (total_size-past , Some(total_size-past))
     }
